@@ -11,62 +11,11 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.2.3)
 # Make use of c++14
 SET(CMAKE_CXX_STANDARD 14)
 
-PROJECT(behave)
+PROJECT(pyrothermel)
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/behave)
 add_subdirectory(pybind11)
 
-
-# optional test executable
-OPTION(TEST_BEHAVE "Enable Testing" ON)
-OPTION(TEST_MORTALITY "Enable Mortality Testing" ON)
-
-# optional stand-alone executables
-OPTION(EXAMPLE_APP "Example client application" ON)
-OPTION(MY_TEST_APP "Example client application" ON)
-OPTION(RAWS_BATCH "Enable Behave RAWS Data Batch Reader" OFF)
-OPTION(COMPUTE_SPOT_PILE "Build pile spot fire distance calculator" OFF)
-OPTION(COMPUTE_SPOT_SURFACE "Build surface spot fire distance calculator" OFF)
-OPTION(COMPUTE_SPOT_TORCHING_TREES "Build torching tree spot fire distance calculator" OFF)
-
-# Optional python bindings build
-OPTION(PYTHON_BINDINGS "Build python bindings" ON)
-
-IF(TEST_BEHAVE)
-    ADD_DEFINITIONS(-DTEST_BEHAVE)
-ENDIF()
-
-IF(TEST_MORTALITY)
-    ADD_DEFINITIONS(-DTEST_MORTALITY)
-ENDIF()
-
-IF(EXAMPLE_APP)
-    ADD_DEFINITIONS(-DEXAMPLE_APP)
-ENDIF()
-
-IF(MY_TEST_APP)
-    ADD_DEFINITIONS(-DMY_TEST_APP)
-ENDIF()
-
-IF(RAWS_BATCH)
-    ADD_DEFINITIONS(-DRAWS_BATCH)
-ENDIF()
-
-IF(COMPUTE_SPOT_PILE)
-    ADD_DEFINITIONS(-DCOMPUTE_SPOT_PILE)
-ENDIF()
-
-IF(COMPUTE_SPOT_SURFACE)
-    ADD_DEFINITIONS(-DCOMPUTE_SPOT_SURFACE)
-ENDIF()
-
-IF(COMPUTE_SPOT_TORCHING_TREES)
-    ADD_DEFINITIONS(-DCOMPUTE_SPOT_TORCHING_TREES)
-ENDIF()
-
-IF(PYTHON_BINDINGS)
-    ADD_DEFINITIONS(-DPYTHON_BINDINGS)
-ENDIF()
 
 SET(SOURCE
     src/behave/behaveRun.cpp
@@ -154,72 +103,7 @@ SET(HEADERS
 SOURCE_GROUP("Behave Core Source Files" FILES ${SOURCE})
 SOURCE_GROUP("Behave Core Header Files" FILES ${HEADERS})
 
-IF(TEST_BEHAVE)
-        SET(BOOST_TEST_SOURCE
-            src/testBehave/testBehave.cpp)
-        ADD_EXECUTABLE(testBehave 
-            ${SOURCE}
-            ${BOOST_TEST_SOURCE}
-            ${HEADERS})
-        TARGET_LINK_LIBRARIES(testBehave)
-ENDIF()
-
-IF(TEST_MORTALITY)
-    SET(BOOST_TEST_SOURCE
-            src/testMortality/mortality_client.cpp)
-    ADD_EXECUTABLE(testMortality
-            ${SOURCE}
-            ${BOOST_TEST_SOURCE}
-            ${HEADERS})
-    TARGET_LINK_LIBRARIES(testMortality)
-ENDIF()
-
-IF(EXAMPLE_APP)
-    ADD_EXECUTABLE(behave 
-        ${SOURCE} 
-        src/behave/client.cpp 
-        ${HEADERS})
-ENDIF()
-
-IF(MY_TEST_APP)
-    ADD_EXECUTABLE(my_test_app
-            ${SOURCE}
-            main_run.cpp
-            ${HEADERS}
-            main_run.cpp)
-ENDIF()
-
-IF(RAWS_BATCH)
-    ADD_EXECUTABLE(behave-raws-batch
+pybind11_add_module(pyrothermel
         ${SOURCE}
-        src/rawsBatch/behaveRawsBatch.cpp
+        src/pyrothermel.cpp
         ${HEADERS})
-ENDIF()
-
-IF(COMPUTE_SPOT_PILE)
-    ADD_EXECUTABLE(compute_spot_distance_pile
-        ${SOURCE}
-        src/spotDistancePile/computePileSpottingDistance.cpp
-        ${HEADERS})
-ENDIF()
-
-IF(COMPUTE_SPOT_SURFACE)
-    ADD_EXECUTABLE(compute_spot_distance_surface
-        ${SOURCE}
-        src/spotDistanceSurface/computeSurfaceSpottingDistance.cpp
-        ${HEADERS})
-ENDIF()
-
-IF(COMPUTE_SPOT_TORCHING_TREES)
-    ADD_EXECUTABLE(compute_spot_distance_trees
-        ${SOURCE}
-        src/spotDistanceTorchingTrees/computeTorchingTreesSpottingDistance.cpp
-        ${HEADERS})
-ENDIF()
-
-IF(PYTHON_BINDINGS)
-    pybind11_add_module(pyrothermel
-            ${SOURCE}
-            src/pyrothermel.cpp
-            ${HEADERS})
-ENDIF()
