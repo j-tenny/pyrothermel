@@ -103,7 +103,7 @@ SET(HEADERS
 SOURCE_GROUP("Behave Core Source Files" FILES ${SOURCE})
 SOURCE_GROUP("Behave Core Header Files" FILES ${HEADERS})
 
-pybind11_add_module(pyrothermel
+pybind11_add_module(pyrothermel_bindings
         ${SOURCE}
-        src/pyrothermel.cpp
+        pyrothermel/pyrothermel_bindings.cpp
         ${HEADERS})

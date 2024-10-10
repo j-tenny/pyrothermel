@@ -13,6 +13,7 @@
 # Behave executable files
 src/rawsBatch/
 src/spotDistancePile/
+src/spotDistanceSurface/
 src/spotDistanceTorchingTrees/
 src/testBehave/
 src/testMortality/

@@ -131,7 +131,7 @@ setup(
     author="Johnathan Tenny",
     author_email="jt893@nau.edu",
     description="Python bindings to run Rothermel fire behavior models using Behave C++ code",
-    ext_modules=[CMakeExtension("pyrothermel")],
+    ext_modules=[CMakeExtension(name="pyrothermel_bindings")],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
     extras_require={"test": ["pytest>=6.0"]},
