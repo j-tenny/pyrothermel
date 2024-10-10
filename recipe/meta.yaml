@@ -1,0 +1,30 @@
+package:
+  name: pyrothermel
+  version: "0.0.1"
+
+source:
+  url: https://pypi.org/project/pyrothermel/0.0.1/
+  #sha256: <sha256-of-your-package-source>
+
+build:
+  noarch: python
+  number: 0
+
+requirements:
+  host:
+    - python
+    - pip
+    - pybind11  # Specify any build-time dependencies
+  run:
+    - python
+    - pybind11  # Specify runtime dependencies
+
+test:
+  imports:
+    - pyrothermel
+
+about:
+  home: https://github.com/j-tenny/pyrothermel
+  license: MIT
+  license_file: LICENSE
+  summary: A short description of your package

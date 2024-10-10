@@ -220,3 +220,5 @@ ModelManifest.xml
 
 # Test Results
 results.csv
+/pyrothermel/__pycache__
+/__pycache__
