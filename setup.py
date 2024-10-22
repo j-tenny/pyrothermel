@@ -16,16 +16,15 @@ behave_sources = glob.glob('src/behave/*.cpp')
 
 ext_modules = [
     Extension(
-        'pyrothermel.pyrothermel_bindings',
+        'pyrothermel_bindings',  # Ensure this matches your package structure
         sources=['pyrothermel/pyrothermel_bindings.cpp'] + behave_sources,
         include_dirs=[
             get_pybind_include(),
             get_pybind_include(user=True),
             'pybind11/include',
-            'src/behave',  # Add this directory for the headers
+            'src/behave',
         ],
         language='c++',
-        #extra_compile_args=['/std:c++11'],  # Windows flag for C++11 support
     ),
 ]
 
@@ -35,7 +34,7 @@ ext_modules = [
 # Setup
 setup(
     name='pyrothermel',
-    version='0.0.3',
+    version='0.0.4',
     author='Johnathan Tenny',
     author_email='jt893@nau.edu',
     description='Python bindings and API for Behave extended Rothermel fire models',
