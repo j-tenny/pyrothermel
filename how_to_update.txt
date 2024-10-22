@@ -1,0 +1,7 @@
+1. Edit files as needed
+2. Update version number in setup.py (and recipe/meta.yaml if we ever try conda-forge)
+3. Commit and push on git
+4. Delete old folders for dist and pyrothermel.egg-info
+5. In terminal, run: conda activate pyrothermal_test
+6. In terminal, run: python -m build
+7. In terminal, run: twine upload dist/*

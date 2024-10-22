@@ -35,7 +35,7 @@ ext_modules = [
 # Setup
 setup(
     name='pyrothermel',
-    version='0.0.2',
+    version='0.0.3',
     author='Johnathan Tenny',
     author_email='jt893@nau.edu',
     description='Python bindings and API for Behave extended Rothermel fire models',
