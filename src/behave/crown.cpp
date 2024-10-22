@@ -1064,9 +1064,9 @@ std::string Crown::getFireTypeStr() const {
 
     switch (fireType)
     {
-        case FireType::Surface: return "Surface";
-        case FireType::Crowning: return "Crowning";
-        case FireType::Torching: return "Torching";
-        case FireType::ConditionalCrownFire: return "ConditionalCrownFire";
+        case FireType::Surface: return "surface";
+        case FireType::Crowning: return "crowning";
+        case FireType::Torching: return "torching";
+        case FireType::ConditionalCrownFire: return "conditional_crown_fire";
     }
 }

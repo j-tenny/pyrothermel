@@ -1,11 +1,36 @@
-from example import transition_ratio
 from pyrothermel import behave_core, units, modes
 from typing import Union
 
 _FM_INDEX = 255
 
 class PyrothermelRun:
-    def __init__(self, fuel_model, moisture_scenario, wind_speed, units_preset='metric', wind_input_mode='direct_midflame', wind_direction=0, slope=0., aspect=0, air_temperature=None, canopy_base_height = None, canopy_bulk_density = None, canopy_cover=None, canopy_height=None, canopy_ratio=None):
+    def __init__(self, fuel_model: 'FuelModel', moisture_scenario: 'MoistureScenario', wind_speed: float,
+                 units_preset: Union[str, 'UnitsPreset'] = 'metric', wind_input_mode: str = 'direct_midflame',
+                 wind_direction: float = 0, slope: float = 0., aspect: float = 0,
+                 air_temperature: Union[float, None] = None, canopy_base_height: Union[float, None] = None,
+                 canopy_bulk_density: Union[float, None] = None, canopy_cover: Union[float, None] = None,
+                 canopy_height: Union[float, None] = None, canopy_ratio: Union[float, None] = None) -> None:
+
+        """
+        Initializes a PyrothermelRun object for fire behavior simulation.
+
+        Args:
+            fuel_model (FuelModel): FuelModel object containing fuel loading values
+            moisture_scenario (MoistureScenario): MoistureScenario object containing fuel moisture values
+            wind_speed (float): Wind speed value. Default metric unit: km/hr, default US unit: mi/hr.
+            units_preset (Union[str, UnitsPreset], optional): Can be 'metric', 'us_standard', or a custom UnitsPreset object. Sets numerous input/output measurement units.
+            wind_input_mode (str): Input height mode for wind. Options are 'direct_midflame', 'ten_meter', or 'twenty_foot'. If 'ten_meter' or 'twenty_foot' is used, must provide canopy height, canopy cover, canopy ratio to perform automatic adjustments. 
+            wind_direction (float): Direction of wind in degrees relative to North.
+            slope (float): Terrain slope. Default unit is degrees.
+            aspect (float): Terrain aspect in degrees relative to North.
+            air_temperature (float): Ambient air temperature, used in scorch model. If None, defaults to 30 degrees C or 85 degrees F.
+            canopy_base_height (float): Required for crown fire simulations. Default unit is meters for metric or feet for US. 
+            canopy_bulk_density (float, optional): Required for crown fire simulations. Default unit is kg/m^3 for metric or lb/ft^3 for US.
+            canopy_cover (float): Fraction of canopy cover. Only required if wind_input_mode != 'direct_midflame'. Default unit is fraction between 0 and 1.
+            canopy_height (float): Total height of canopy. Only required if wind_input_mode != 'direct_midflame'. Default unit is meters for metric or feet for US.
+            canopy_ratio (float): Ratio of total height where significant foliage is present. Only required if wind_input_mode != 'direct_midflame'. Default unit is fraction between 0 and 1.
+        """
+
         # Instantiate objects required by behave_core
         self._fuel_models = behave_core.FuelModels()
         self._mortality_species_table = behave_core.SpeciesMasterTable()
@@ -29,6 +54,26 @@ class PyrothermelRun:
         self.update_inputs(fuel_model=fuel_model, moisture_scenario=moisture_scenario, wind_speed=wind_speed, units_preset=units_preset, wind_input_mode=wind_input_mode, wind_direction=wind_direction, slope=slope, aspect=aspect, air_temperature=air_temperature,canopy_base_height=canopy_base_height,canopy_bulk_density=canopy_bulk_density, canopy_cover=canopy_cover, canopy_height=canopy_height, canopy_ratio=canopy_ratio)
 
     def update_inputs(self,fuel_model=None, moisture_scenario=None, wind_speed=None, units_preset=None, wind_input_mode=None, wind_direction=None, slope=None, aspect=None, air_temperature=None, canopy_base_height=None, canopy_bulk_density=None, canopy_cover=None, canopy_height=None, canopy_ratio=None):
+
+        """
+        Update one or more input values.
+
+        Args:
+            fuel_model (FuelModel): FuelModel object containing fuel loading values
+            moisture_scenario (MoistureScenario): MoistureScenario object containing fuel moisture values
+            wind_speed (float): Wind speed value. Default metric unit: km/hr, default US unit: mi/hr.
+            units_preset (Union[str, UnitsPreset], optional): Can be 'metric', 'us_standard', or a custom UnitsPreset object. Sets numerous input/output measurement units.
+            wind_input_mode (str): Input height mode for wind. Options are 'direct_midflame', 'ten_meter', or 'twenty_foot'. If 'ten_meter' or 'twenty_foot' is used, must provide canopy height, canopy cover, canopy ratio to perform automatic adjustments.
+            wind_direction (float): Direction of wind in degrees relative to North.
+            slope (float): Terrain slope. Default unit is degrees.
+            aspect (float): Terrain aspect in degrees relative to North.
+            air_temperature (float): Ambient air temperature, used in scorch model. If None, defaults to 30 degrees C or 85 degrees F.
+            canopy_base_height (float): Required for crown fire simulations. Default unit is meters for metric or feet for US.
+            canopy_bulk_density (float, optional): Required for crown fire simulations. Default unit is kg/m^3 for metric or lb/ft^3 for US.
+            canopy_cover (float): Fraction of canopy cover. Only required if wind_input_mode != 'direct_midflame'. Default unit is fraction between 0 and 1.
+            canopy_height (float): Total height of canopy. Only required if wind_input_mode != 'direct_midflame'. Default unit is meters for metric or feet for US.
+            canopy_ratio (float): Ratio of total height where significant foliage is present. Only required if wind_input_mode != 'direct_midflame'. Default unit is fraction between 0 and 1.
+        """
 
         if units_preset is not None:
             self.units = _get_units_preset(units_preset)
@@ -136,7 +181,25 @@ class PyrothermelRun:
 
         return [wind_input_mode,canopy_cover,canopy_height,canopy_ratio]
 
-    def run_surface_fire_in_direction_of_max_spread(self):
+    def run_surface_fire_in_direction_of_max_spread(self)->dict:
+        """
+        Runs SURFACE module from behave, adds results to PyrothermelRun object as properties and returns dictionary with results.
+
+        Args:
+        None
+
+        Returns:
+        spread_rate: surface fire rate of spread. Default unit is km/hr for metric, chains/hr for US
+        flame_length: surface fire flame length. Default unit is m for metric, feet for US.
+        fireline_intensity: Byram's fireline intensity. Default unit is kW/m for metric, btus/ft/s for US.
+        scorch_height: Canopy scorch height from surface fire. Default unit is m for metric, feet for US.
+        midflame_windspeed: Adjusted midflame windspeed. Default unit is km/hr for metric, mi/hr for US.
+        direction: Direction of maximum spread relative to North
+
+
+        :return: dict
+        """
+
         self.update_inputs()
         self._run.surface.doSurfaceRunInDirectionOfMaxSpread()
         self.spread_rate = self._run.surface.getSpreadRate(self.units.spread_rate_units)
@@ -148,10 +211,38 @@ class PyrothermelRun:
                                                                       self.midflame_windspeed, self.units.windspeed_units, self.air_temperature,
                                                                       self.units.temperature_units, self.units.length_units)
         results = {'spread_rate': self.spread_rate,'flame_length':self.flame_length,
-                   'fireline_intensity':self.fireline_intensity,'scorch_height':self.scorch_height}
+                   'fireline_intensity':self.fireline_intensity,'scorch_height':self.scorch_height,
+                   'midflame_windspeed':self.midflame_windspeed,'direction':self.direction_of_max_spread}
         return results
 
     def run_surface_fire_in_direction_of_interest(self, direction):
+        """
+        Runs SURFACE module from behave, adds results to PyrothermelRun object as properties and returns dictionary with results.
+        Calculates results for direction of interest relative to point fire center.
+
+        Args:
+        None
+
+        Returns:
+        spread_rate: surface fire rate of spread. Default unit is km/hr for metric, chains/hr for US
+        flame_length: surface fire flame length. Default unit is m for metric, feet for US.
+        fireline_intensity: Byram's fireline intensity. Default unit is kW/m for metric, btus/ft/s for US.
+        midflame_windspeed: Adjusted midflame windspeed. Default unit is km/hr for metric, mi/hr for US.
+        scorch_height: Canopy scorch height from surface fire. Default unit is m for metric, feet for US.
+        direction: Direction of interest specified by user.
+
+        :return: dict
+
+        Example:
+
+        run = PyrothermelRun(FuelModel.from_existing('TL8'), MoistureScenario.from_existing(1,2), 30)
+        results_max_spread = run.run_surface_fire_in_direction_of_max_spread()
+        dir_max_spread = results_max_spread['direction']
+        results_flanking1 = run.run_surface_fire_in_direction_of_interest(dir_max_spread - 90)
+        results_flanking2 = run.run_surface_fire_in_direction_of_interest(dir_max_spread - 270)
+        results_backing = run.run_surface_fire_in_direction_of_interest(dir_max_spread - 180)
+        """
+
         self.update_inputs()
         self._run.surface.doSurfaceRunInDirectionOfInterest(direction,modes.WindAndSpreadOrientationMode.RelativeToNorth)
         self.spread_rate = self._run.surface.getSpreadRate(self.units.spread_rate_units)
@@ -163,10 +254,35 @@ class PyrothermelRun:
                                                                       self.midflame_windspeed, self.units.windspeed_units, self.air_temperature,
                                                                       self.units.temperature_units, self.units.length_units)
         results = {'spread_rate': self.spread_rate,'flame_length':self.flame_length,
-                   'fireline_intensity':self.fireline_intensity,'scorch_height':self.scorch_height}
+                   'fireline_intensity':self.fireline_intensity,'scorch_height':self.scorch_height,
+                   'midflame_windspeed':self.midflame_windspeed,'direction':self.direction_of_max_spread}
         return results
 
     def run_crown_fire_scott_and_reinhardt(self):
+        """
+        Runs CROWN module from behave using Scott and Reinhardt approach. Adds results to PyrothermelRun object as
+        properties and returns dictionary with results.
+
+        Must run run_surface_fire_in_direction_of_max_spread before running this function.
+        Must set canopy_base_height and canopy_bulk_density model inputs.
+
+        Args:
+        None
+
+        Returns:
+        spread_rate: Combined surface/crown fire rate of spread. Default unit is km/hr for metric, chains/hr for US
+        flame_length:  Combined surface/crown fire flame length. Default unit is m for metric, feet for US.
+        fireline_intensity:  Combined surface/crown Byram's fireline intensity. Default unit is kW/m for metric, btus/ft/s for US.
+        scorch_height: Canopy scorch height from surface fire. Default unit is m for metric, feet for US.
+        transition_ratio: Current wind speed / winds peed to initiate a crown fire. If transition_ratio >= 1, fire type changes.
+        active_ratio: Current wind speed / winds peed to propegate a crown fire. If active_ratio >= 1, fire type changes.
+        fire_type: 'surface': transition_ratio < 1, active_ratio < 1; 'crowning': transition_ratio >= 1, active ratio >= 1; 'torching': transition_ratio >= 1, active_ratio < 1; 'conditional_crown_fire': transition_ratio < 1, active_ratio >= 1
+        midflame_windspeed: Adjusted midflame windspeed. Default unit is km/hr for metric, mi/hr for US.
+        direction: Direction of maximum spread relative to North
+
+
+        :return: dict
+        """
         if self.canopy_base_height is None or self.canopy_bulk_density is None:
             raise ValueError('canopy_base_height and canopy_bulk_density must be provided')
 
@@ -196,10 +312,37 @@ class PyrothermelRun:
 
         results = {'spread_rate': self.spread_rate,'flame_length':self.flame_length,
                    'fireline_intensity':self.fireline_intensity, 'scorch_height':self.scorch_height,
-                   'transition_ratio':self.transition_ratio, 'active_ratio':self.active_ratio,'fire_type':self.fire_type}
+                   'transition_ratio':self.transition_ratio, 'active_ratio':self.active_ratio,'fire_type':self.fire_type,
+                   'midflame_windspeed':self.midflame_windspeed,'direction':self.direction_of_max_spread
+                   }
         return results
 
     def run_crown_fire_rothermel(self):
+        """
+        Runs CROWN module from behave using Scott and Reinhardt approach. Adds results to PyrothermelRun object as
+        properties and returns dictionary with results.
+
+        Must run run_surface_fire_in_direction_of_max_spread before running this function.
+        Must set canopy_base_height and canopy_bulk_density model inputs.
+
+        Args:
+        None
+
+        Returns:
+        spread_rate: Combined surface/crown fire rate of spread. Default unit is km/hr for metric, chains/hr for US
+        flame_length:  Combined surface/crown fire flame length. Default unit is m for metric, feet for US.
+        fireline_intensity:  Combined surface/crown Byram's fireline intensity. Default unit is kW/m for metric, btus/ft/s for US.
+        scorch_height: Canopy scorch height from surface fire. Default unit is m for metric, feet for US.
+        transition_ratio: Current wind speed / winds peed to initiate a crown fire. If transition_ratio >= 1, fire type changes.
+        active_ratio: Current wind speed / winds peed to propegate a crown fire. If active_ratio >= 1, fire type changes.
+        fire_type: 'surface': transition_ratio < 1, active_ratio < 1; 'crowning': transition_ratio >= 1, active ratio >= 1; 'torching': transition_ratio >= 1, active_ratio < 1; 'conditional_crown_fire': transition_ratio < 1, active_ratio >= 1
+        midflame_windspeed: Adjusted midflame windspeed. Default unit is km/hr for metric, mi/hr for US.
+        direction: Direction of maximum spread relative to North
+
+
+        :return: dict
+        """
+
         if self.canopy_base_height is None or self.canopy_bulk_density is None:
             raise ValueError('canopy_base_height and canopy_bulk_density must be provided')
 
@@ -232,10 +375,20 @@ class PyrothermelRun:
         results = {'spread_rate': self.spread_rate, 'flame_length': self.flame_length,
                    'fireline_intensity': self.fireline_intensity, 'scorch_height': self.scorch_height,
                    'transition_ratio': self.transition_ratio, 'active_ratio': self.active_ratio,
-                   'fire_type': self.fire_type}
+                   'fire_type': self.fire_type, 'midflame_windspeed':self.midflame_windspeed,'direction':self.direction_of_max_spread}
         return results
 
     def calculate_torching_index(self, max_wind_speed=99, step=1):
+        """
+        Calculates the minimum wind speed required to initiate a crown fire under the stored fuel and moisture conditions.
+        Calculated via an iterative process of increasing wind speed.
+
+        Args:
+        max_wind_speed: maximum wind speed to be considered. Default units is km/hr for metric or mi/hr for US.
+        step: step size used for increasing wind speed in each iteration.
+
+        :return: float
+        """
         for wind_speed in range(0, max_wind_speed, step):
             self.update_inputs(wind_speed=wind_speed)
             self.run_surface_fire_in_direction_of_max_spread()
@@ -245,6 +398,16 @@ class PyrothermelRun:
         return wind_speed
 
     def calculate_crowning_index(self, max_wind_speed=99, step=1):
+        """
+        Calculates the minimum wind speed required to propegate a crown fire under the stored fuel and moisture conditions.
+        Calculated via an iterative process of increasing wind speed.
+
+        Args:
+        max_wind_speed: maximum wind speed to be considered. Default units is km/hr for metric or mi/hr for US.
+        step: step size used for increasing wind speed in each iteration.
+
+        :return: float
+        """
         for wind_speed in range(0, max_wind_speed, step):
             self.update_inputs(wind_speed=wind_speed)
             self.run_surface_fire_in_direction_of_max_spread()
@@ -258,6 +421,17 @@ class UnitsPreset:
                  windspeed_units, fraction_units, slope_units, density_units, heat_of_combustion_units,
                  heat_sink_units, heat_per_unit_area_units, heat_source_and_reaction_intensity_units,
                  fireline_intensity_units, temperature_units, time_units):
+        """
+        UnitsPreset object is used to determine the measurement units for input and output values in simulations. Use
+        UnitsPreset.metric() or UnitsPreset.us_standard() to get default presets. Modify these presets or create your own
+        using objects from the pyrothermel.units module which stores bindings to c++ enums for all unit types supported
+        in Behave.
+
+        Example:
+            from pyrothermel import UnitsPreset, units
+            my_units = UnitsPreset.metric()
+            my_units.windspeed_units = units.SpeedUnits.MetersPerSecond
+        """
 
         self.area_units = area_units
         self.basal_area_units = basal_area_units
@@ -280,6 +454,15 @@ class UnitsPreset:
 
     @classmethod
     def metric(cls):
+        """
+        units.AreaUnits.SquareMeters, units.BasalAreaUnits.SquareMetersPerHectare, units.LengthUnits.Meters,
+         units.LoadingUnits.KilogramsPerSquareMeter, units.SurfaceAreaToVolumeUnits.SquareMetersOverCubicMeters,
+         units.PressureUnits.KiloPascal, units.SpeedUnits.KilometersPerHour, units.SpeedUnits.KilometersPerHour,
+         units.FractionUnits.Fraction, units.SlopeUnits.Degrees, units.DensityUnits.KilogramsPerCubicMeter,
+         units.HeatOfCombustionUnits.KilojoulesPerKilogram, units.HeatSinkUnits.KilojoulesPerCubicMeter,
+         units.HeatPerUnitAreaUnits.KilojoulesPerSquareMeter, units.HeatSourceAndReactionIntensityUnits.KilowattsPerSquareMeter,
+         units.FirelineIntensityUnits.KilowattsPerMeter, units.TemperatureUnits.Celsius, units.TimeUnits.Hours
+        """
         preset = cls(units.AreaUnits.SquareMeters, units.BasalAreaUnits.SquareMetersPerHectare, units.LengthUnits.Meters,
                      units.LoadingUnits.KilogramsPerSquareMeter, units.SurfaceAreaToVolumeUnits.SquareMetersOverCubicMeters,
                      units.PressureUnits.KiloPascal, units.SpeedUnits.KilometersPerHour, units.SpeedUnits.KilometersPerHour,
@@ -291,6 +474,16 @@ class UnitsPreset:
 
     @classmethod
     def us_standard(cls):
+        """
+        units.AreaUnits.Acres, units.BasalAreaUnits.SquareFeetPerAcre, units.LengthUnits.Feet,
+         units.LoadingUnits.TonsPerAcre, units.SurfaceAreaToVolumeUnits.SquareFeetOverCubicFeet,
+         units.PressureUnits.PoundPerSquareInch, units.SpeedUnits.ChainsPerHour, units.SpeedUnits.MilesPerHour,
+         units.FractionUnits.Fraction, units.SlopeUnits.Degrees, units.DensityUnits.PoundsPerCubicFoot,
+         units.HeatOfCombustionUnits.BtusPerPound, units.HeatSinkUnits.BtusPerCubicFoot,
+         units.HeatPerUnitAreaUnits.BtusPerSquareFoot, units.HeatSourceAndReactionIntensityUnits.BtusPerSquareFootPerSecond,
+         units.FirelineIntensityUnits.BtusPerFootPerSecond, units.TemperatureUnits.Fahrenheit, units.TimeUnits.Hours
+        :return:
+        """
         preset = cls(units.AreaUnits.Acres, units.BasalAreaUnits.SquareFeetPerAcre, units.LengthUnits.Feet,
                      units.LoadingUnits.TonsPerAcre, units.SurfaceAreaToVolumeUnits.SquareFeetOverCubicFeet,
                      units.PressureUnits.PoundPerSquareInch, units.SpeedUnits.ChainsPerHour, units.SpeedUnits.MilesPerHour,
@@ -349,25 +542,26 @@ class FuelModel:
                 is_dynamic: bool,
     ) -> None:
         """
-        Sets the fuel model record with the provided parameters.
+        Initiates FuelModel object with the provided parameters. It is recommended to use the FuelModel.from_existing()
+        method to get values from an existing fuel model, then you can modify the values as needed for a custom model.
 
         Args:
             units_preset: can be 'metric', 'us_standard', or a UnitsPreset object
-            fuel_model_number (int): The fuel model number.
-            code (str): The code representing the fuel model.
-            name (str): The name of the fuel model.
-            fuel_bed_depth (float): Depth of the fuel bed.
-            moisture_of_extinction_dead (float): Moisture of extinction for dead fuels.
-            heat_of_combustion_dead (float): Heat of combustion for dead fuels.
-            heat_of_combustion_live (float): Heat of combustion for live fuels.
-            fuel_load_one_hour (float): Fuel load for one-hour interval.
-            fuel_load_ten_hour (float): Fuel load for ten-hour interval.
-            fuel_load_hundred_hour (float): Fuel load for hundred-hour interval.
-            fuel_load_live_herbaceous (float): Live herbaceous fuel load.
-            fuel_load_live_woody (float): Live woody fuel load.
-            savr_one_hour (float): Surface area-to-volume ratio for one-hour fuels.
-            savr_live_herbaceous (float): Surface area-to-volume ratio for live herbaceous fuels.
-            savr_live_woody (float): Surface area-to-volume ratio for live woody fuels.
+            fuel_model_number (int): The fuel model number. Value is stored for reference but not used in modelling.
+            code (str): The code representing the fuel model. Value is stored for reference but not used in modelling.
+            name (str): The name of the fuel model. Value is stored for reference but not used in modelling.
+            fuel_bed_depth (float): Depth of the fuel bed. Default units are meters for metric, feet for US.
+            moisture_of_extinction_dead (float): Moisture of extinction for dead fuels. Default unit is fraction between 0 and 1.
+            heat_of_combustion_dead (float): Heat of combustion for dead fuels. Default units are kJ/kg for metric or btu/lb for US.
+            heat_of_combustion_live (float): Heat of combustion for live fuels. Default units are kJ/kg for metric or btu/lb for US.
+            fuel_load_one_hour (float): Fuel load for one-hour interval. Default units are kg/m^2 for metric or tons/ac for US.
+            fuel_load_ten_hour (float): Fuel load for ten-hour interval. Default units are kg/m^2 for metric or tons/ac for US.
+            fuel_load_hundred_hour (float): Fuel load for hundred-hour interval. Default units are kg/m^2 for metric or tons/ac for US.
+            fuel_load_live_herbaceous (float): Live herbaceous fuel load. Default units are kg/m^2 for metric or tons/ac for US.
+            fuel_load_live_woody (float): Live woody fuel load. Default units are kg/m^2 for metric or tons/ac for US.
+            savr_one_hour (float): Surface area-to-volume ratio for one-hour fuels. Default units are m^2/m^3 for metric or ft^2/ft^3 for US.
+            savr_live_herbaceous (float): Surface area-to-volume ratio for live herbaceous fuels. Default units are m^2/m^3 for metric or ft^2/ft^3 for US.
+            savr_live_woody (float): Surface area-to-volume ratio for live woody fuels. Default units are m^2/m^3 for metric or ft^2/ft^3 for US.
             is_dynamic (bool): Indicates if the model is dynamic.
         """
         self.units = _get_units_preset(units_preset)
@@ -389,7 +583,16 @@ class FuelModel:
         self.is_dynamic = is_dynamic
 
     @classmethod
-    def from_existing(cls,identifier,units_preset='metric')->'FuelModel':
+    def from_existing(cls,identifier:Union[str,int],units_preset='metric')->'FuelModel':
+        """
+        Initiates FuelModel object from an existing standard fuel model (Scott and Burgan 2005).
+        Default fuel loading units are kg/m^2 for metric or tons/ac for US.
+
+        Args:
+        identifier: int representing index ID of standard fuel model or str representing model code, e.g. 'TL8'
+        units_preset: can be 'metric', 'us_standard', or a UnitsPreset object.
+
+        """
         units_preset = _get_units_preset(units_preset)
         fuelModels = behave_core.FuelModels()
         if type(identifier) is not int:
@@ -421,6 +624,9 @@ class FuelModel:
         return mod
 
 class MoistureScenario:
+    """
+    Initiates MoistureScenario from provided inputs. Default values are fractions between 0 and 1.
+    """
     def __init__(self, moisture_one_hour:float, moisture_ten_hour:float, moisture_hundred_hour:float, moisture_live_herbaceous:float, moisture_live_woody:float, foliar_moisture = 1, fraction_units='fraction'):
 
         if type(fraction_units) != units.FractionUnits.FractionUnitsEnum:
@@ -464,8 +670,7 @@ class MoistureScenario:
         """
             Create MoistureScenario from a preset found in Scott & Burgan (2005).
 
-            Parameters:
-            -----------
+            Args:
             dead_fuel_moisture_class : int or str
                 Dead fuel moisture scenario. Acceptable values are:
                 - 1 or 'very_low'
@@ -480,10 +685,10 @@ class MoistureScenario:
                 - 3 or 'moderate'
                 - 4 or 'high'
 
-            foliar_moisture : float, optional
+            foliar_moisture : float
                 The foliar moisture content, default is 1.
 
-            fraction_units : str, optional
+            fraction_units : str
                 The units for fraction values. Can be 'fraction' or 'percent', but fraction is recommended.
 
             Returns:

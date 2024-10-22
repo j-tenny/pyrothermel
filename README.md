@@ -1,16 +1,18 @@
 # Pyrothermel
-Model fire rate of spread, fire intensity, tree mortality, and more for surface fires and crown fires using the extended 
-Rothermel model. Pyrothermel provides a Python interface to the same C++ code that underlies [Behave](https://github.com/firelab/behave), Flammap, and other 
+Model fire rate of spread, intensity, and more for surface fires and crown fires using the extended 
+Rothermel model. Pyrothermel provides a Python interface to the C++ code that underlies [Behave](https://github.com/firelab/behave), Flammap, and other 
 software tools maintained by the Missoula Fire Lab*.
 
-Please submit bugs and feature requests as Github issues. Expect significant API changes in early versions of this package. 
+Please submit bugs and feature requests as Github issues. Note, there may be some API changes in early versions of this package. 
 
 *Pyrothermel and its authors are not associated with the Missoula Fire Lab or the US Government.
 
 ## Dependencies
 - Python >= 3.8
 - setuptools
-- A C++ compiler (tested with Visual Studio 2022 and gcc)
+- A C++ compiler
+The C++ compilers used for testing were Visual Studio 2022 and gcc for WSL. 
+A compiler is not needed if you are using Windows, Python version 12, and amd64 processor architecture.
 
 ## Quick Install
 ```bash

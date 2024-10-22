@@ -1,1 +1,2 @@
 recursive-include src/behave *.h *.cpp
+include pyrothermel/pyrothermel_bindings.cpp

@@ -222,3 +222,5 @@ ModelManifest.xml
 results.csv
 /pyrothermel/__pycache__
 /__pycache__
+*.pyc
+*.pyc
