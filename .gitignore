@@ -224,4 +224,3 @@ results.csv
 /__pycache__
 *.pyc
 *.pyc
-*.pyd
