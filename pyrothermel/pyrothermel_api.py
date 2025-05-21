@@ -86,7 +86,11 @@ class PyrothermelRun:
         if wind_direction is not None:
             self.wind_direction = wind_direction
         if slope is not None:
-            self.slope = slope
+            if slope>=0:
+                self.slope = slope
+            else:
+                raise ValueError('Slope must be positive')
+            #TODO: Add more validation
         if aspect is not None:
             self.aspect = aspect
         if air_temperature is not None:
@@ -244,7 +248,7 @@ class PyrothermelRun:
         """
 
         self.update_inputs()
-        self._run.surface.doSurfaceRunInDirectionOfInterest(direction,modes.WindAndSpreadOrientationMode.RelativeToNorth)
+        self._run.surface.doSurfaceRunInDirectionOfInterest(direction,modes.SurfaceFireSpreadDirectionMode.FromIgnitionPoint)
         self.spread_rate = self._run.surface.getSpreadRate(self.units.spread_rate_units)
         self.flame_length = self._run.surface.getFlameLength(self.units.length_units)
         self.fireline_intensity = self._run.surface.getFirelineIntensity(self.units.fireline_intensity_units)
@@ -623,6 +627,31 @@ class FuelModel:
 
         return mod
 
+    @property
+    def bulk_density(self):
+        bd = (self.fuel_load_one_hour + self.fuel_load_ten_hour + self.fuel_load_hundred_hour +
+              self.fuel_load_live_herbaceous + self.fuel_load_live_woody) / self.fuel_bed_depth
+        return bd
+
+    # @property
+    # def packing_ratio(self):
+    #     particle_density_constant = 32 #standard particle density is 32 lbs/ft^3
+    #     if self.units.loading_units == units.LoadingUnits.PoundsPerSquareFoot and self.units.length_units == units.LengthUnits.Feet:
+    #         return self.bulk_density / particle_density_constant
+    #     elif self.units.loading_units == units.LoadingUnits.KilogramsPerSquareMeter and self.units.length_units == units.LengthUnits.Meter:
+    #         particle_density_constant *= 16.01846337396 #conversion from lbs/ft^3 to kg/m^3
+    #         return self.bulk_density / particle_density_constant
+    #     else:
+    #         raise ValueError("Packing ratio currently supports loading_units kg/m^2 with length_units m or loading_units lbs/ft^2 with length_units feet")
+
+    @bulk_density.setter
+    def bulk_density(self, bulk_density):
+        """Adjusts fuel bed depth such that bulk density matches specified value"""
+        self.fuel_bed_depth = (self.fuel_load_one_hour + self.fuel_load_ten_hour + self.fuel_load_hundred_hour +
+                               self.fuel_load_live_herbaceous + self.fuel_load_live_woody) / bulk_density
+
+
+
 class MoistureScenario:
     """
     Initiates MoistureScenario from provided inputs. Default values are fractions between 0 and 1.
@@ -779,3 +808,115 @@ class MoistureScenario:
             raise ValueError('live_fuel_moisture_class must one of 1:very_low, 2:low, 3:moderate, 4:high')
 
         return cls(one_hr, ten_hr, hundred_hr, live_herb, live_woody, foliar_moisture, fraction_units)
+
+def calculate_characteristic_savr(savr_arr, loading_arr, particle_density):
+    """Calculate characteristic surface-area-to-volume ratio for a fuel bed with mixed particle sizes.
+
+    If both live and dead fuels are included, arrays must be 2-D with rows representing status classes and cols
+    representing size classes. Particle density is usually taken as 512.6 kg/m^3 (32 lbs/ft^3).
+
+    References SAVR values for cylinders
+
+    | Diameter (cm) | SAVR (cm⁻¹) |
+    | ------------- | ---------- |
+    | 0.0356        | 114.83     |
+    | 0.0610        | 65.61      |
+    | 0.1016        | 39.37      |
+    | 0.1524        | 24.61      |
+    | 0.6350        | 6.30       |
+    | 1.1176        | 3.58       | * std value for 10-hr fuel
+    | 1.2700        | 3.15       |
+    | 2.5400        | 1.57       |
+    | 4.0640        | 0.98       | * std value for 100-hr fuel
+    | 7.6200        | 0.52       |
+
+
+    | Diameter (inches) | SAVR (feet⁻¹) |
+    | ----------------- | ------------ |
+    | 0.014             | 3,500        |
+    | 0.024             | 2,000        | * typical for leaf litter
+    | 0.040             | 1,200        |
+    | 0.060             | 750          |
+    | 0.250             | 192          |
+    | 0.440             | 109          | * std value for 10-hr fuel
+    | 0.500             | 96           |
+    | 1.000             | 48           |
+    | 1.600             | 30           | * std value for 100-hr fuel
+    | 3.000             | 16           |
+
+
+    """
+    import numpy as np
+    savr_arr = np.array(savr_arr).T
+    loading_arr = np.array(loading_arr).T
+    particle_density_arr = np.array(particle_density).T
+    if particle_density_arr.shape == 1:
+        particle_density_arr = np.ones_like(savr_arr) * particle_density_arr
+
+    a_weights = savr_arr * loading_arr / particle_density_arr
+    f_weights = a_weights / a_weights.sum(0)
+
+    if len(savr_arr.shape) == 1:
+        return np.sum(f_weights * savr_arr)
+
+    elif len(savr_arr.shape)==2:
+        f_weights_class = a_weights.sum(0) / a_weights.sum()
+        savr_class = np.sum(f_weights * savr_arr, 0)
+        return np.sum(f_weights_class * savr_class)
+    else:
+        raise ValueError('input arrays must have 1 or 2 dimensions')
+
+def calculate_characteristic_load(savr_arr, loading_arr, particle_density, mineral_fraction=0.0555, units='m'):
+    """Calculate characteristic fuel load for a fuel bed with mixed particle sizes.
+
+    If both live and dead fuels are included, arrays must be 2-D with rows representing status classes and cols
+    representing size classes."""
+
+    import numpy as np
+    savr_arr = np.array(savr_arr).T
+    loading_arr = np.array(loading_arr).T
+    particle_density_arr = np.array(particle_density).T
+    mineral_fraction_arr = np.array(mineral_fraction).T
+    if particle_density_arr.shape == 1:
+        particle_density_arr = np.ones_like(savr_arr,float) * particle_density_arr
+
+    if mineral_fraction_arr.shape == 1:
+        mineral_fraction_arr = np.ones_like(savr_arr) * mineral_fraction_arr
+
+    a_weights = savr_arr * loading_arr / particle_density_arr
+    f_weights = a_weights / a_weights.sum(0)
+
+    savr_classes = np.array([0,16,48,96,192,1200,np.inf])
+    if units == 'm':
+        savr_classes *= 3.2808
+    elif units == 'cm':
+        savr_classes /= 30.48
+    elif units == 'ft':
+        pass
+    else:
+        raise ValueError('units must either be "m", "cm", or "ft"')
+
+    g_weights = np.zeros_like(savr_arr,float)
+    if len(savr_arr.shape) == 1:
+        for low, high in zip(savr_classes[:-1],savr_classes[1:]):
+            mask = (savr_arr >= low) & (savr_arr <= high)
+            g_weights[mask] = np.sum(f_weights[mask])
+    elif len(savr_arr.shape) == 2:
+        for low, high in zip(savr_classes[:-1],savr_classes[1:]):
+            mask0 = (savr_arr[:,0] >= low) & (savr_arr[:,0] <= high)
+            g_weights[mask0,0] = np.sum(f_weights[mask0,0])
+            mask1 = (savr_arr[:,1] >= low) & (savr_arr[:,1] <= high)
+            g_weights[mask1,1] = np.sum(f_weights[mask1,1])
+    else:
+        raise ValueError('input arrays must have 1 or 2 dimensions')
+
+
+    load_net = loading_arr * (1 - mineral_fraction_arr)
+    characteristic_mineral_fraction = np.sum(f_weights * mineral_fraction_arr, 0)
+
+    load_net_class = np.sum(g_weights * load_net, 0)
+    characteristic_load = load_net_class / (1-characteristic_mineral_fraction)
+    return characteristic_load
+
+
+

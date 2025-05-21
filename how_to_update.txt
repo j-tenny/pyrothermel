@@ -1,3 +1,4 @@
+0. pip install build twine
 1. Edit files as needed
 2. Update version number in setup.py (and recipe/meta.yaml if we ever try conda-forge)
 3. Commit and push on git

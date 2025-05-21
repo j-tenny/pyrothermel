@@ -34,20 +34,17 @@ ext_modules = [
 # Setup
 setup(
     name='pyrothermel',
-    version='0.0.4',
+    version='0.0.5',
     author='Johnathan Tenny',
     author_email='jt893@nau.edu',
     description='Python bindings and API for Behave extended Rothermel fire models',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
     url='https://github.com/j-tenny/pyrothermel',
+    license='MIT',
     packages=find_packages(),
     ext_modules=ext_modules,
     include_package_data=True,
-    install_requires=[
-        #'pybind11>=2.6.0',
-        # Include other dependencies if necessary
-    ],
     classifiers=[
         'Programming Language :: Python :: 3',
         'Programming Language :: C++',
