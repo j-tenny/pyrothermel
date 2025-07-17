@@ -1,109 +1,24 @@
+cmake_minimum_required(VERSION 3.15)
+project(pyrothermel LANGUAGES CXX)
 
-# ****************************************************************************/
-# This is set to 2.8.11 to use the target_link_libraries command. In CMake 
-# 2.8.11 and later versions, this command automatically adds appropriate 
-# include directories, compile definitions, the position-independent-code flag, 
-# and links to the qtmain.lib library on Windows.
-# *****************************************************************************
+# Use C++14 or upgrade to C++17 if needed
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.2.3)
+# Behave source files
+file(GLOB_RECURSE BEHAVE_SOURCES CONFIGURE_DEPENDS "src/behave/*.cpp")
+file(GLOB_RECURSE BEHAVE_HEADERS CONFIGURE_DEPENDS "src/behave/*.h")
 
-# Make use of c++14
-SET(CMAKE_CXX_STANDARD 14)
-
-PROJECT(pyrothermel)
-
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/behave)
+# Add pybind11 subdirectory if bundled (optional, prefer find_package otherwise)
 add_subdirectory(pybind11)
 
-
-SET(SOURCE
-    src/behave/behaveRun.cpp
-    src/behave/behaveUnits.cpp
-    src/behave/canopy_coefficient_table.cpp
-    src/behave/chaparralFuel.cpp
-    src/behave/Contain.cpp
-    src/behave/ContainAdapter.cpp
-    src/behave/ContainForce.cpp
-    src/behave/ContainForceAdapter.cpp
-    src/behave/ContainResource.cpp
-    src/behave/ContainSim.cpp
-    src/behave/crown.cpp
-    src/behave/crownInputs.cpp
-    src/behave/fineDeadFuelMoistureTool.cpp
-    src/behave/fireSize.cpp
-    src/behave/fuelModels.cpp
-    src/behave/ignite.cpp
-    src/behave/igniteInputs.cpp
-    src/behave/moistureScenarios.cpp
-    src/behave/mortality.cpp
-    src/behave/mortality_equation_table.cpp
-    src/behave/mortality_inputs.cpp
-    src/behave/newext.cpp
-    src/behave/palmettoGallberry.cpp
-    src/behave/randfuel.cpp
-    src/behave/randthread.cpp
-    src/behave/safety.cpp
-    src/behave/slopeTool.cpp
-    src/behave/species_master_table.cpp
-    src/behave/spot.cpp
-    src/behave/spotInputs.cpp
-    src/behave/surface.cpp
-    src/behave/surfaceFireReactionIntensity.cpp
-    src/behave/surfaceFuelbedIntermediates.cpp
-    src/behave/surfaceInputs.cpp
-    src/behave/surfaceFire.cpp
-    src/behave/surfaceTwoFuelModels.cpp
-    src/behave/westernAspen.cpp
-    src/behave/windAdjustmentFactor.cpp
-    src/behave/windSpeedUtility.cpp
-    src/behave/vaporPressureDeficitCalculator.cpp)
-
-SET(HEADERS
-    src/behave/behaveRun.h
-    src/behave/behaveUnits.h
-    src/behave/canopy_coefficient_table.h
-    src/behave/chaparralFuel.h
-    src/behave/Contain.h
-    src/behave/ContainAdapter.h
-    src/behave/ContainForce.h
-    src/behave/ContainForceAdapter.h
-    src/behave/ContainResource.h
-    src/behave/ContainSim.h
-    src/behave/crown.h
-    src/behave/crownInputs.h
-    src/behave/fireSize.h
-    src/behave/fuelModels.h
-    src/behave/ignite.h
-    src/behave/igniteInputs.h
-    src/behave/mortality.h
-    src/behave/mortality_equation_table.h
-    src/behave/mortality_inputs.h
-    src/behave/newext.h
-    src/behave/palmettoGallberry.h
-    src/behave/randfuel.h
-    src/behave/randthread.h
-    src/behave/safety.h
-    src/behave/slopeTool.h
-    src/behave/species_master_table.h
-    src/behave/spot.h
-    src/behave/spotInputs.h
-    src/behave/surface.h
-    src/behave/surfaceFireReactionIntensity.h
-    src/behave/surfaceFuelbedIntermediates.h
-    src/behave/surfaceInputEnums.h
-    src/behave/surfaceInputs.h
-    src/behave/surfaceFire.h
-    src/behave/surfaceTwoFuelModels.h
-    src/behave/westernAspen.h
-    src/behave/windAdjustmentFactor.h
-    src/behave/windSpeedUtility.h
-    src/behave/vaporPressureDeficitCalculator.h)
-
-SOURCE_GROUP("Behave Core Source Files" FILES ${SOURCE})
-SOURCE_GROUP("Behave Core Header Files" FILES ${HEADERS})
-
+# Add the bindings
 pybind11_add_module(pyrothermel_bindings
-        ${SOURCE}
-        pyrothermel/pyrothermel_bindings.cpp
-        ${HEADERS})
+    pyrothermel/pyrothermel_bindings.cpp
+    ${BEHAVE_SOURCES}
+    ${BEHAVE_HEADERS}  # Not required, but useful for IDEs
+)
+
+target_include_directories(pyrothermel_bindings PRIVATE
+    src/behave
+)
