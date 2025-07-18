@@ -417,10 +417,10 @@ PYBIND11_MODULE(pyrothermel_bindings, m) {
 
     // Expose BehaveRun class
     py::class_<BehaveRun>(behave_core, "BehaveRun")
-            .def(py::init<FuelModels&, SpeciesMasterTable&>());
-//            .def_readwrite("surface", &BehaveRun::surface)
-//            .def_readwrite("mortality", &BehaveRun::mortality)
-//            .def_readwrite("crown", &BehaveRun::crown)
+            .def(py::init<FuelModels&, SpeciesMasterTable&>())
+            .def_readwrite("surface", &BehaveRun::surface)
+            .def_readwrite("mortality", &BehaveRun::mortality)
+            .def_readwrite("crown", &BehaveRun::crown);
 //            .def_readwrite("contain",&BehaveRun::contain)
 //            .def_readwrite("ignite",&BehaveRun::ignite)
 //            .def_readwrite("spot",&BehaveRun::spot)
