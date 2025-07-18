@@ -210,7 +210,7 @@ class PyrothermelRun:
         self.spread_rate = self._run.surface.getSpreadRate(self.units.spread_rate_units)
         self.flame_length = self._run.surface.getFlameLength(self.units.length_units)
         self.fireline_intensity = self._run.surface.getFirelineIntensity(self.units.fireline_intensity_units)
-        self.reaction_intensity = self._run.surface.getReactionIntensity(self.units.heat_of_combustion_units)
+        self.reaction_intensity = self._run.surface.getReactionIntensity(self.units.heat_source_and_reaction_intensity_units)
         self.midflame_windspeed = self._run.surface.getMidflameWindspeed(self.units.windspeed_units)
         self.direction_of_max_spread = self._run.surface.getDirectionOfMaxSpread()
         self.scorch_height = self._run.mortality.calculateScorchHeight(self.fireline_intensity, self.units.fireline_intensity_units,
@@ -316,7 +316,7 @@ class PyrothermelRun:
 
         self.spread_rate = self._run.crown.getFinalSpreadRate(self.units.spread_rate_units)
         self.fireline_intensity = self._run.crown.getFinalFirelineIntensity(self.units.fireline_intensity_units)
-        self.reaction_intensity = self._run.surface.getReactionIntensity(self.units.heat_of_combustion_units)
+        self.reaction_intensity = self._run.crown.getFinalHeatPerUnitArea(self.units.heat_per_unit_area_units)
         self.flame_length = self._run.crown.getFinalFlameLength(self.units.length_units)
         self.transition_ratio = self._run.crown.getTransitionRatio()
         self.active_ratio = self._run.crown.getActiveRatio()
@@ -380,7 +380,7 @@ class PyrothermelRun:
 
         self.spread_rate = self._run.crown.getFinalSpreadRate(self.units.spread_rate_units)
         self.fireline_intensity = self._run.crown.getFinalFirelineIntensity(self.units.fireline_intensity_units)
-        self.reaction_intensity = self._run.surface.getReactionIntensity(self.units.heat_of_combustion_units)
+        self.reaction_intensity = self._run.crown.getFinalHeatPerUnitArea(self.units.heat_per_unit_area_units)
         self.flame_length = self._run.crown.getCrownFinalFlameLength(self.units.length_units)
         self.transition_ratio = self._run.crown.getTransitionRatio()
         self.active_ratio = self._run.crown.getActiveRatio()
@@ -545,7 +545,8 @@ class UnitsPreset:
                 self.fireline_intensity_units,
                 self.temperature_units,
                 self.time_units]
-        return str(dict(zip(desc, vals)))
+        vals = [str(val).split('.')[-1] for val in vals]
+        return f'UnitsPreset({str(dict(zip(desc, vals)))})'
 
 def _get_units_preset(units_preset) -> 'UnitsPreset':
     if type(units_preset) is UnitsPreset:
@@ -635,6 +636,11 @@ class FuelModel:
         self.savr_live_herbaceous = savr_live_herbaceous
         self.savr_live_woody = savr_live_woody
         self.is_dynamic = is_dynamic
+
+    def __repr__(self):
+        d = self.__dict__
+        del(d['units'])
+        return f'FuelModel({d})'
 
     @classmethod
     def from_existing(cls,identifier:Union[str,int],units_preset='metric')->'FuelModel':
@@ -807,6 +813,10 @@ class MoistureScenario:
         self.moisture_live_woody = moisture_live_woody
         self.foliar_moisture = foliar_moisture
         self.units = fraction_units
+
+    def __repr__(self):
+        d = f'MoistureScenario({str(self.__dict__)}'
+        return d
 
     @classmethod
     def from_existing(

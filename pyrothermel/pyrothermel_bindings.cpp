@@ -454,11 +454,11 @@ PYBIND11_MODULE(pyrothermel_bindings, m) {
             .def("getFinalSpreadRate", &Crown::getFinalSpreadRate)
             .def("getFinalFirelineIntensity", &Crown::getFinalFirelineIntesity)
             .def("getFinalFlameLength", &Crown::getFinalFlameLength)
-            .def("getFinalReactionIntensity",&Crown::getFinalReactionIntensity);
+            .def("getFinalHeatPerUnitArea",&Crown::getFinalHeatPerUnitArea)
             .def("getCrownFlameLength", &Crown::getCrownFlameLength)
             .def("getTransitionRatio", &Crown::getTransitionRatio)
             .def("getActiveRatio", &Crown::getActiveRatio)
-            .def("getFireType", &Crown::getFireTypeStr)
+            .def("getFireType", &Crown::getFireTypeStr);
 
 
     // TODO: Expose other necessary classes and methods
