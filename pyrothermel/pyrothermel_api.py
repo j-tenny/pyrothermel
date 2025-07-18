@@ -1,5 +1,5 @@
 from pyrothermel import behave_core, units, modes
-from typing import Union
+from typing import Union, Tuple
 
 _FM_INDEX = 255
 
@@ -649,6 +649,76 @@ class FuelModel:
         """Adjusts fuel bed depth such that bulk density matches specified value"""
         self.fuel_bed_depth = (self.fuel_load_one_hour + self.fuel_load_ten_hour + self.fuel_load_hundred_hour +
                                self.fuel_load_live_herbaceous + self.fuel_load_live_woody) / bulk_density
+
+    def characteristic_load(self)->Tuple[float,float]:
+        from pyrothermel import units
+        """Calculates characteristic load, returns (characteristic dead load, characteristic live load)"""
+        import numpy as np
+        if self.units.savr_units == units.SurfaceAreaToVolumeUnits.SquareFeetOverCubicFeet:
+            savr_10hr = 109
+            savr_100hr = 30
+            units = 'ft'
+        elif self.units.savr_units == units.SurfaceAreaToVolumeUnits.SquareCentimetersOverCubicCentimeters:
+            savr_10hr = 3.58
+            savr_100hr = 0.98
+            units = 'm'
+        else:
+            raise NotImplementedError("SAVR units must be square feet over cubic feet or square centimeters over cubic centimeters")
+
+        if self.units.loading_units == units.LoadingUnits.PoundsPerSquareFoot:
+            particle_density = 32
+        elif self.units.loading_units == units.LoadingUnits.KilogramsPerSquareMeter:
+            particle_density = 512.6
+        else:
+            raise NotImplementedError("Loading units must be pounds per square foot or kilograms per square meter")
+
+        loading_arr = np.array([[self.fuel_load_one_hour, self.fuel_load_ten_hour,self.fuel_load_hundred_hour],
+                                [self.fuel_load_live_herbaceous, self.fuel_load_live_woody, 0]])
+        savr_arr = np.array([[self.savr_one_hour, savr_10hr, savr_100hr],
+                            [self.savr_live_herbaceous, self.savr_live_woody, 0]])
+
+        if np.sum(loading_arr[1,:]) == 0:
+            # No live fuel
+            loading_arr = loading_arr[0,:]
+            savr_arr = savr_arr[0,:]
+            dead_load = calculate_characteristic_load(savr_arr, loading_arr, particle_density, units=units)
+            live_load = 0.
+        else:
+            dead_load,live_load = calculate_characteristic_load(savr_arr, loading_arr, particle_density, units=units)
+
+        return dead_load, live_load
+
+    def characteristic_savr(self)->Tuple[float,float]:
+        from pyrothermel import units
+        """Calculates characteristic surface area to volume ratio"""
+        import numpy as np
+        if self.units.savr_units == units.SurfaceAreaToVolumeUnits.SquareFeetOverCubicFeet:
+            savr_10hr = 109
+            savr_100hr = 30
+        elif self.units.savr_units == units.SurfaceAreaToVolumeUnits.SquareCentimetersOverCubicCentimeters:
+            savr_10hr = 3.58
+            savr_100hr = 0.98
+        else:
+            raise NotImplementedError("SAVR units must be square feet over cubic feet or square centimeters over cubic centimeters")
+
+        if self.units.loading_units == units.LoadingUnits.PoundsPerSquareFoot:
+            particle_density = 32
+        elif self.units.loading_units == units.LoadingUnits.KilogramsPerSquareMeter:
+            particle_density = 512.6
+        else:
+            raise NotImplementedError("Loading units must be pounds per square foot or kilograms per square meter")
+
+        loading_arr = np.array([[self.fuel_load_one_hour, self.fuel_load_ten_hour,self.fuel_load_hundred_hour],
+                                [self.fuel_load_live_herbaceous, self.fuel_load_live_woody, 0]])
+        savr_arr = np.array([[self.savr_one_hour, savr_10hr, savr_100hr],
+                            [self.savr_live_herbaceous, self.savr_live_woody, 0]])
+
+        if np.sum(loading_arr[1,:]) == 0:
+            # No live fuel
+            loading_arr = loading_arr[0,:]
+            savr_arr = savr_arr[0,:]
+
+        return calculate_characteristic_savr(savr_arr, loading_arr, particle_density)
 
 
 
