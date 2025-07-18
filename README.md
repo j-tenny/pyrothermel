@@ -9,30 +9,13 @@ Please submit bugs and feature requests as Github issues. Note, there may be som
 
 ## Dependencies
 - Python >= 3.8
-- setuptools
-- A C++ compiler
+- A C++ compiler (`conda install -c conda-forge compilers`)
 The C++ compilers used for testing were Visual Studio 2022 and gcc for WSL. 
-A compiler is not needed if you are using Windows, Python version 12, and amd64 processor architecture.
 
-## Quick Install
+## Install
 ```bash
 pip install pyrothermel
 ```
-
-## Manual Install
-Download
-```bash
-git clone https://github.com/j-tenny/pyrothermel.git
-```
-Build
-```bash
-python setup.py bdist_wheel
-```
-Install (Will need to replace filename of wheel to match your machine and python version)
-```bash
-pip install dist/[your-file-name.whl] --force-reinstall
-```
-
 
 ## Quickstart
 ```python
@@ -85,19 +68,7 @@ df
 
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
 
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
