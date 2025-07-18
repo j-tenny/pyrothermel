@@ -190,19 +190,18 @@ class PyrothermelRun:
         Runs SURFACE module from behave, adds results to PyrothermelRun object as properties and returns dictionary with results.
 
         Args:
-        None
+            None
 
         Returns:
-        spread_rate: surface fire rate of spread. Default unit is km/hr for metric, chains/hr for US
-        flame_length: surface fire flame length. Default unit is m for metric, feet for US.
-        fireline_intensity: Byram's fireline intensity. Default unit is kW/m for metric, btus/ft/s for US.
-        reaction_intensity: Fireline reaction intensity. Default unit is kW/m^2 for metric, btus/ft^2/s for US.
-        scorch_height: Canopy scorch height from surface fire. Default unit is m for metric, feet for US.
-        midflame_windspeed: Adjusted midflame windspeed. Default unit is km/hr for metric, mi/hr for US.
-        direction: Direction of maximum spread relative to North
+            spread_rate: surface fire rate of spread. Default unit is km/hr for metric, chains/hr for US
+            flame_length: surface fire flame length. Default unit is m for metric, feet for US.
+            fireline_intensity: Byram's fireline intensity. Default unit is kW/m for metric, btus/ft/s for US.
+            reaction_intensity: Fireline reaction intensity. Default unit is kW/m^2 for metric, btus/ft^2/s for US.
+            scorch_height: Canopy scorch height from surface fire. Default unit is m for metric, feet for US.
+            midflame_windspeed: Adjusted midflame windspeed. Default unit is km/hr for metric, mi/hr for US.
+            direction: Direction of maximum spread relative to North
 
 
-        :return: dict
         """
 
         self.update_inputs()
@@ -228,44 +227,46 @@ class PyrothermelRun:
         Calculates results for direction of interest relative to point fire center.
 
         Args:
-        None
+            None
 
         Returns:
-        spread_rate: surface fire rate of spread. Default unit is km/hr for metric, chains/hr for US
-        flame_length: surface fire flame length. Default unit is m for metric, feet for US.
-        fireline_intensity: Byram's fireline intensity. Default unit is kW/m for metric, btus/ft/s for US.
-        reaction_intensity: Fireline reaction intensity. Default unit is kW/m^2 for metric, btus/ft^2/s for US.
-        midflame_windspeed: Adjusted midflame windspeed. Default unit is km/hr for metric, mi/hr for US.
-        scorch_height: Canopy scorch height from surface fire. Default unit is m for metric, feet for US.
-        direction: Direction of interest specified by user.
+            spread_rate: surface fire rate of spread. Default unit is km/hr for metric, chains/hr for US
+            flame_length: surface fire flame length. Default unit is m for metric, feet for US.
+            fireline_intensity: Byram's fireline intensity. Default unit is kW/m for metric, btus/ft/s for US.
+            reaction_intensity: None. Not implemented for direction of interest.
+            midflame_windspeed: Adjusted midflame windspeed. Default unit is km/hr for metric, mi/hr for US.
+            scorch_height: Canopy scorch height from surface fire. Default unit is m for metric, feet for US.
+            direction: Direction of interest specified by user.
 
-        :return: dict
 
         Example:
 
+        ```
         run = PyrothermelRun(FuelModel.from_existing('TL8'), MoistureScenario.from_existing(1,2), 30)
         results_max_spread = run.run_surface_fire_in_direction_of_max_spread()
         dir_max_spread = results_max_spread['direction']
         results_flanking1 = run.run_surface_fire_in_direction_of_interest(dir_max_spread - 90)
         results_flanking2 = run.run_surface_fire_in_direction_of_interest(dir_max_spread - 270)
         results_backing = run.run_surface_fire_in_direction_of_interest(dir_max_spread - 180)
+        ```
         """
 
         self.update_inputs()
         self._run.surface.doSurfaceRunInDirectionOfInterest(direction,modes.SurfaceFireSpreadDirectionMode.FromIgnitionPoint)
-        self.spread_rate = self._run.surface.getSpreadRate(self.units.spread_rate_units)
-        self.flame_length = self._run.surface.getFlameLength(self.units.length_units)
-        self.fireline_intensity = self._run.surface.getFirelineIntensity(self.units.fireline_intensity_units)
-        self.reaction_intensity = self._run.surface.getReactionIntensity(self.units.heat_source_and_reaction_intensity_units)
+        self.spread_rate = self._run.surface.getSpreadRateInDirectionOfInterest(self.units.spread_rate_units)
+        self.flame_length = self._run.surface.getFlameLengthInDirectionOfInterest(self.units.length_units)
+        self.fireline_intensity = self._run.surface.getFirelineIntensityInDirectionOfInterest(self.units.fireline_intensity_units)
+        self.reaction_intensity = None
         self.midflame_windspeed = self._run.surface.getMidflameWindspeed(self.units.windspeed_units)
         self.direction_of_max_spread = self._run.surface.getDirectionOfMaxSpread()
+        self.direction_of_interest = direction
         self.scorch_height = self._run.mortality.calculateScorchHeight(self.fireline_intensity, self.units.fireline_intensity_units,
                                                                       self.midflame_windspeed, self.units.windspeed_units, self.air_temperature,
                                                                       self.units.temperature_units, self.units.length_units)
         results = {'spread_rate': self.spread_rate,'flame_length':self.flame_length,
                    'fireline_intensity':self.fireline_intensity,'reaction_intensity':self.reaction_intensity,
                     'scorch_height':self.scorch_height,
-                   'midflame_windspeed':self.midflame_windspeed,'direction':self.direction_of_max_spread}
+                   'midflame_windspeed':self.midflame_windspeed,'direction':self.direction_of_interest}
         return results
 
     def run_crown_fire_scott_and_reinhardt(self):
@@ -280,16 +281,16 @@ class PyrothermelRun:
         None
 
         Returns:
-        spread_rate: Combined surface/crown fire rate of spread. Default unit is km/hr for metric, chains/hr for US
-        flame_length:  Combined surface/crown fire flame length. Default unit is m for metric, feet for US.
-        fireline_intensity:  Combined surface/crown Byram's fireline intensity. Default unit is kW/m for metric, btus/ft/s for US.
-        reaction_intensity: Fireline reaction intensity. Default unit is kW/m^2 for metric, btus/ft^2/s for US.
-        scorch_height: Canopy scorch height from surface fire. Default unit is m for metric, feet for US.
-        transition_ratio: Current wind speed / winds peed to initiate a crown fire. If transition_ratio >= 1, fire type changes.
-        active_ratio: Current wind speed / winds peed to propegate a crown fire. If active_ratio >= 1, fire type changes.
-        fire_type: 'surface': transition_ratio < 1, active_ratio < 1; 'crowning': transition_ratio >= 1, active ratio >= 1; 'torching': transition_ratio >= 1, active_ratio < 1; 'conditional_crown_fire': transition_ratio < 1, active_ratio >= 1
-        midflame_windspeed: Adjusted midflame windspeed. Default unit is km/hr for metric, mi/hr for US.
-        direction: Direction of maximum spread relative to North
+            spread_rate: Combined surface/crown fire rate of spread. Default unit is km/hr for metric, chains/hr for US
+            flame_length:  Combined surface/crown fire flame length. Default unit is m for metric, feet for US.
+            fireline_intensity:  Combined surface/crown Byram's fireline intensity. Default unit is kW/m for metric, btus/ft/s for US.
+            reaction_intensity: Fireline reaction intensity. Default unit is kW/m^2 for metric, btus/ft^2/s for US.
+            scorch_height: Canopy scorch height from surface fire. Default unit is m for metric, feet for US.
+            transition_ratio: Current wind speed / winds peed to initiate a crown fire. If transition_ratio >= 1, fire type changes.
+            active_ratio: Current wind speed / winds peed to propegate a crown fire. If active_ratio >= 1, fire type changes.
+            fire_type: 'surface': transition_ratio < 1, active_ratio < 1; 'crowning': transition_ratio >= 1, active ratio >= 1; 'torching': transition_ratio >= 1, active_ratio < 1; 'conditional_crown_fire': transition_ratio < 1, active_ratio >= 1
+            midflame_windspeed: Adjusted midflame windspeed. Default unit is km/hr for metric, mi/hr for US.
+            direction: Direction of maximum spread relative to North
 
 
         :return: dict
@@ -338,22 +339,21 @@ class PyrothermelRun:
         Must set canopy_base_height and canopy_bulk_density model inputs.
 
         Args:
-        None
+            None
 
         Returns:
-        spread_rate: Combined surface/crown fire rate of spread. Default unit is km/hr for metric, chains/hr for US
-        flame_length:  Combined surface/crown fire flame length. Default unit is m for metric, feet for US.
-        fireline_intensity:  Combined surface/crown Byram's fireline intensity. Default unit is kW/m for metric, btus/ft/s for US.
-        reaction_intensity: Fireline reaction intensity. Default unit is kW/m^2 for metric, btus/ft^2/s for US.
-        scorch_height: Canopy scorch height from surface fire. Default unit is m for metric, feet for US.
-        transition_ratio: Current wind speed / winds peed to initiate a crown fire. If transition_ratio >= 1, fire type changes.
-        active_ratio: Current wind speed / winds peed to propegate a crown fire. If active_ratio >= 1, fire type changes.
-        fire_type: 'surface': transition_ratio < 1, active_ratio < 1; 'crowning': transition_ratio >= 1, active ratio >= 1; 'torching': transition_ratio >= 1, active_ratio < 1; 'conditional_crown_fire': transition_ratio < 1, active_ratio >= 1
-        midflame_windspeed: Adjusted midflame windspeed. Default unit is km/hr for metric, mi/hr for US.
-        direction: Direction of maximum spread relative to North
+            spread_rate: Combined surface/crown fire rate of spread. Default unit is km/hr for metric, chains/hr for US
+            flame_length:  Combined surface/crown fire flame length. Default unit is m for metric, feet for US.
+            fireline_intensity:  Combined surface/crown Byram's fireline intensity. Default unit is kW/m for metric, btus/ft/s for US.
+            reaction_intensity: Fireline reaction intensity. Default unit is kW/m^2 for metric, btus/ft^2/s for US.
+            scorch_height: Canopy scorch height from surface fire. Default unit is m for metric, feet for US.
+            transition_ratio: Current wind speed / winds peed to initiate a crown fire. If transition_ratio >= 1, fire type changes.
+            active_ratio: Current wind speed / winds peed to propegate a crown fire. If active_ratio >= 1, fire type changes.
+            fire_type: 'surface': transition_ratio < 1, active_ratio < 1; 'crowning': transition_ratio >= 1, active ratio >= 1; 'torching': transition_ratio >= 1, active_ratio < 1; 'conditional_crown_fire': transition_ratio < 1, active_ratio >= 1
+            midflame_windspeed: Adjusted midflame windspeed. Default unit is km/hr for metric, mi/hr for US.
+            direction: Direction of maximum spread relative to North
 
 
-        :return: dict
         """
 
         if self.canopy_base_height is None or self.canopy_bulk_density is None:
@@ -381,7 +381,7 @@ class PyrothermelRun:
         self.spread_rate = self._run.crown.getFinalSpreadRate(self.units.spread_rate_units)
         self.fireline_intensity = self._run.crown.getFinalFirelineIntensity(self.units.fireline_intensity_units)
         self.reaction_intensity = self._run.crown.getFinalHeatPerUnitArea(self.units.heat_per_unit_area_units)
-        self.flame_length = self._run.crown.getCrownFinalFlameLength(self.units.length_units)
+        self.flame_length = self._run.crown.getFinalFlameLength(self.units.length_units)
         self.transition_ratio = self._run.crown.getTransitionRatio()
         self.active_ratio = self._run.crown.getActiveRatio()
         self.fire_type = self._run.crown.getFireType()
@@ -417,10 +417,9 @@ class PyrothermelRun:
         Calculated via an iterative process of increasing wind speed.
 
         Args:
-        max_wind_speed: maximum wind speed to be considered. Default units is km/hr for metric or mi/hr for US.
-        step: step size used for increasing wind speed in each iteration.
+            max_wind_speed: maximum wind speed to be considered. Default units is km/hr for metric or mi/hr for US.
+            step: step size used for increasing wind speed in each iteration.
 
-        :return: float
         """
         for wind_speed in range(0, max_wind_speed, step):
             self.update_inputs(wind_speed=wind_speed)
@@ -619,7 +618,7 @@ class FuelModel:
             savr_live_woody (float): Surface area-to-volume ratio for live woody fuels. Default units are m^2/m^3 for metric or ft^2/ft^3 for US.
             is_dynamic (bool): Indicates if the model is dynamic.
         """
-        self.units = _get_units_preset(units_preset)
+
         self.fuel_model_number = fuel_model_number
         self.code = code
         self.name = name
@@ -636,10 +635,10 @@ class FuelModel:
         self.savr_live_herbaceous = savr_live_herbaceous
         self.savr_live_woody = savr_live_woody
         self.is_dynamic = is_dynamic
+        self.units = _get_units_preset(units_preset)
 
     def __repr__(self):
         d = self.__dict__
-        del(d['units'])
         return f'FuelModel({d})'
 
     @classmethod
@@ -713,11 +712,11 @@ class FuelModel:
         if self.units.savr_units == units.SurfaceAreaToVolumeUnits.SquareFeetOverCubicFeet:
             savr_10hr = 109
             savr_100hr = 30
-            units = 'ft'
+            savr_units = 'ft'
         elif self.units.savr_units == units.SurfaceAreaToVolumeUnits.SquareCentimetersOverCubicCentimeters:
             savr_10hr = 3.58
             savr_100hr = 0.98
-            units = 'm'
+            savr_units = 'm'
         else:
             raise NotImplementedError("SAVR units must be square feet over cubic feet or square centimeters over cubic centimeters")
 
@@ -737,10 +736,10 @@ class FuelModel:
             # No live fuel
             loading_arr = loading_arr[0,:]
             savr_arr = savr_arr[0,:]
-            dead_load = calculate_characteristic_load(savr_arr, loading_arr, particle_density, units=units)
+            dead_load = calculate_characteristic_load(savr_arr, loading_arr, particle_density, units=savr_units)
             live_load = 0.
         else:
-            dead_load,live_load = calculate_characteristic_load(savr_arr, loading_arr, particle_density, units=units)
+            dead_load,live_load = calculate_characteristic_load(savr_arr, loading_arr, particle_density, units=savr_units)
 
         return dead_load, live_load
 

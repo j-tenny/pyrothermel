@@ -433,10 +433,13 @@ PYBIND11_MODULE(pyrothermel_bindings, m) {
             .def("doSurfaceRunInDirectionOfInterest",&Surface::doSurfaceRunInDirectionOfInterest)
             .def("getMidflameWindspeed",&Surface::getMidflameWindspeed)
             .def("getSpreadRate", &Surface::getSpreadRate)
+            .def("getSpreadRateInDirectionOfInterest", &Surface::getSpreadRateInDirectionOfInterest)
             .def("getFlameLength", &Surface::getFlameLength)
+            .def("getFlameLengthInDirectionOfInterest", &Surface::getFlameLengthInDirectionOfInterest)
             .def("getDirectionOfMaxSpread", &Surface::getDirectionOfMaxSpread)
             .def("setIsUsingChaparral", &Surface::setIsUsingChaparral)
             .def("getFirelineIntensity",&Surface::getFirelineIntensity)
+            .def("getFirelineIntensityInDirectionOfInterest",&Surface::getFirelineIntensityInDirectionOfInterest)
             .def("getReactionIntensity",&Surface::getReactionIntensity);
 
     // Expose Mortality class
@@ -455,7 +458,7 @@ PYBIND11_MODULE(pyrothermel_bindings, m) {
             .def("getFinalFirelineIntensity", &Crown::getFinalFirelineIntesity)
             .def("getFinalFlameLength", &Crown::getFinalFlameLength)
             .def("getFinalHeatPerUnitArea",&Crown::getFinalHeatPerUnitArea)
-            .def("getCrownFlameLength", &Crown::getCrownFlameLength)
+            .def("getFinalFlameLength",&Crown::getFinalFlameLength)
             .def("getTransitionRatio", &Crown::getTransitionRatio)
             .def("getActiveRatio", &Crown::getActiveRatio)
             .def("getFireType", &Crown::getFireTypeStr);
