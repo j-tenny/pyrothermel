@@ -2,7 +2,6 @@
 requires = [
     "scikit-build-core",
     "pybind11",
-    "setuptools",  # optional, needed if you still use find_packages
 ]
 build-backend = "scikit_build_core.build"
 
