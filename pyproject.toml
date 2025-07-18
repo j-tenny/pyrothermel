@@ -7,7 +7,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "pyrothermel"
-version = "0.1.0"
+version = "0.1.2"
 description = "Python bindings and API for Behave extended Rothermel fire models"
 readme = "README.md"
 authors = [
