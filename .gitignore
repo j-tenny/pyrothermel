@@ -224,3 +224,5 @@ results.csv
 /__pycache__
 *.pyc
 *.pyc
+*.pyd
+pyrothermel/pyrothermel_bindings.cp312-win_amd64.pyd
