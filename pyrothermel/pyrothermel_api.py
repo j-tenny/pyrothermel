@@ -946,18 +946,18 @@ def calculate_characteristic_savr(savr_arr, loading_arr, particle_density):
 
     References SAVR values for cylinders
 
-    | Diameter (cm) | SAVR (cm⁻¹) |
+    | Diameter (cm) | SAVR (m⁻¹) |
     | ------------- | ---------- |
-    | 0.0356        | 114.83     |
-    | 0.0610        | 65.61      |
-    | 0.1016        | 39.37      |
-    | 0.1524        | 24.61      |
-    | 0.6350        | 6.30       |
-    | 1.1176        | 3.58       | * std value for 10-hr fuel
-    | 1.2700        | 3.15       |
-    | 2.5400        | 1.57       |
-    | 4.0640        | 0.98       | * std value for 100-hr fuel
-    | 7.6200        | 0.52       |
+    | 0.0356        | 11483     |
+    | 0.0610        | 6561      |
+    | 0.1016        | 3937      |
+    | 0.1524        | 2461      |
+    | 0.6350        | 630       |
+    | 1.1176        | 358       | * std value for 10-hr fuel
+    | 1.2700        | 315       |
+    | 2.5400        | 157       |
+    | 4.0640        | 98       | * std value for 100-hr fuel
+    | 7.6200        | 52       |
 
 
     | Diameter (inches) | SAVR (feet⁻¹) |
@@ -1047,5 +1047,30 @@ def calculate_characteristic_load(savr_arr, loading_arr, particle_density, miner
     characteristic_load = load_net_class / (1-characteristic_mineral_fraction)
     return characteristic_load
 
+def calculate_characteristic_moisture(moisture_arr, savr_arr, loading_arr, particle_density):
+    """Calculate characteristic surface-area-to-volume ratio for a fuel bed with mixed particle sizes.
 
+    If both live and dead fuels are included, arrays must be 2-D with rows representing status classes and cols
+    representing size classes. Particle density is usually taken as 512.6 kg/m^3 (32 lbs/ft^3).
+    """
+    import numpy as np
+    moisture_arr = np.array(moisture_arr).T
+    savr_arr = np.array(savr_arr).T
+    loading_arr = np.array(loading_arr).T
+    particle_density_arr = np.array(particle_density).T
+    if particle_density_arr.shape == 1:
+        particle_density_arr = np.ones_like(savr_arr) * particle_density_arr
+
+    a_weights = savr_arr * loading_arr / particle_density_arr
+    f_weights = a_weights / a_weights.sum(0)
+
+    if len(savr_arr.shape) == 1:
+        return np.sum(f_weights * moisture_arr)
+
+    elif len(savr_arr.shape)==2:
+        f_weights_class = a_weights.sum(0) / a_weights.sum()
+        moisture_class = np.sum(f_weights * moisture_arr, 0)
+        return np.sum(f_weights_class * moisture_class)
+    else:
+        raise ValueError('input arrays must have 1 or 2 dimensions')
 
