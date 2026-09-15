@@ -72,6 +72,7 @@ SurfaceFire& SurfaceFire::operator=(const SurfaceFire& rhs)
 
 void SurfaceFire::initializeMembers()
 {
+    isWindLimitEnabled_ = false;
     isWindLimitExceeded_ = false;
     effectiveWindSpeed_ = 0.0;
     windSpeedLimit_ = 0.0;
@@ -277,7 +278,7 @@ double SurfaceFire::calculateForwardSpreadRate(int fuelModelNumber, bool hasDire
     calculateDirectionOfMaxSpread();
     calculateEffectiveWindSpeed();
     // maximum windspeed effect on ros
-    if (effectiveWindSpeed_ > windSpeedLimit_)
+    if (isWindLimitEnabled_ == true && effectiveWindSpeed_ > windSpeedLimit_)
     {
         applyWindSpeedLimit();
     }
@@ -934,6 +935,22 @@ double SurfaceFire::getChaparralTotalLiveFuelLoad() const
     return surfaceFuelbedIntermediates_.getChaparralTotalLiveFuelLoad();
 }
 
+double SurfaceFire::getTotalLiveFuelLoad(LoadingUnits::LoadingUnitsEnum loadingUnits) const {
+
+    return surfaceFuelbedIntermediates_.getTotalLiveFuelLoad(loadingUnits);
+}
+
+double SurfaceFire::getTotalDeadFuelLoad(LoadingUnits::LoadingUnitsEnum loadingUnits) const {
+
+    return surfaceFuelbedIntermediates_.getTotalDeadFuelLoad(loadingUnits);
+}
+
+double SurfaceFire::getTotalDeadHerbaceousFuelLoad(LoadingUnits::LoadingUnitsEnum loadingUnits) const {
+
+    return surfaceFuelbedIntermediates_.getTotalDeadHerbaceousFuelLoad(loadingUnits);
+}
+
+
 void SurfaceFire::setDirectionOfMaxSpread(double directionOFMaxSpread)
 {
     directionOfMaxSpread_ = directionOFMaxSpread;
@@ -977,6 +994,11 @@ void SurfaceFire::setReactionIntensity(double reactionIntensity)
 void SurfaceFire::setHeatPerUnitArea(double heatPerUnitArea)
 {
     heatPerUnitArea_ = heatPerUnitArea;
+}
+
+void SurfaceFire::setIsWindLimitEnabled(bool isWindLimitEnabled)
+{
+    isWindLimitEnabled_ = isWindLimitEnabled;
 }
 
 void SurfaceFire::setIsWindLimitExceeded(bool isWindLimitExceeded)

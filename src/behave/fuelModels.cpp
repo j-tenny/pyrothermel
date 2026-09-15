@@ -143,7 +143,7 @@ void FuelModels::setFuelModelRecord(int fuelModelNumber, std::string code, std::
 // as well as earmarking which models are available for use as custom models
 void FuelModels::populateFuelModels()
 {
-    // See Standard Fire Behavior Fuel Models: A Comprehensive Set for Use with Rothermel’s
+    // See Standard Fire Behavior Fuel Models: A Comprehensive Set for Use with Rothermel's
     // Surface Fire Spread Model by Joe H.Scott and Robert E.Burgan, 2005
     // https://www.fs.fed.us/rm/pubs/rmrs_gtr153.pdf
 
@@ -153,9 +153,9 @@ void FuelModels::populateFuelModels()
     FuelModelVector_[0].isDefined_ = false;
     /*
     fuelModelNumber, code, name
-    fuelBedDepth, moistureOfExtinctionDeadFuel, heatOfCombustionDeadFuel, heatOfCombustionLiveFuel,
-    fuelLoad1Hour, fuelLoad10Hour, fuelLoad100Hour, fuelLoadLiveHerb, fuelLoadLiveWood,
-    savr1HourFuel, savrLiveHerb, savrLiveWood,
+    fuelBedDepth (ft), moistureOfExtinctionDeadFuel (fraction), heatOfCombustionDeadFuel (Btu/lb), heatOfCombustionLiveFuel (Btu/lb),
+    fuelLoad1Hour, fuelLoad10Hour, fuelLoad100Hour, fuelLoadLiveHerb, fuelLoadLiveWood (all lb/ft^2),
+    savr1HourFuel, savrLiveHerb, savrLiveWood (all ft^2/ft^3),
     isDynamic, isReserved
     - WMC 10/2015
     */
@@ -330,11 +330,29 @@ void FuelModels::populateFuelModels()
         1.0*f, 1.0*f, 0, 9.0*f, 0,
         1800, 1600, 1500,
         true, true);
-    // 110-112 are reserved for future standard grass models
-    for (int i = 110; i <= 112; i++)
-    {
-        markAsReservedModel(i);
-    }
+
+    // Conversions for the metric (V-, M-, F-) fuel models below
+    const double mToFt = 1.0 / 0.3048;
+    const double tphToLbsPerSqFt = (1000.0 / 0.45359237) / (10000.0 / (0.3048 * 0.3048)); // (lbs/tonne) / (ft^2/ha)
+    const double kjPerKgToBtuPerLb = 0.429592; // from behaveUnits.cpp
+    const double mSavToFtSav = 0.3048;
+
+    setFuelModelRecord(110, "V-Hb",
+        "Short Grass, < 0.5 m (Dynamic)",
+        0.35*mToFt, 24, 19000*kjPerKgToBtuPerLb, 19000*kjPerKgToBtuPerLb,
+        0.3*tphToLbsPerSqFt, 0, 0, 1.2*tphToLbsPerSqFt, 0,
+        6000*mSavToFtSav, 6000*mSavToFtSav, 6000*mSavToFtSav,
+        true, true);
+    setFuelModelRecord(111, "V-Ha",
+        "Tall Grass, > 0.5 m (Dynamic)",
+        0.6*mToFt, 24, 19000*kjPerKgToBtuPerLb, 19000*kjPerKgToBtuPerLb,
+        0.5*tphToLbsPerSqFt, 0.1*tphToLbsPerSqFt, 0, 2.5*tphToLbsPerSqFt, 0.3*tphToLbsPerSqFt,
+        4000*mSavToFtSav, 6000*mSavToFtSav, 4000*mSavToFtSav,
+        true, true);
+
+    // 112 reserved for future standard grass models
+    markAsReservedModel(112);
+
     // 113-119 are available for custom grass models
 
     // Code GSx: Grass and shrub
@@ -383,55 +401,112 @@ void FuelModels::populateFuelModels()
         1.0, 0.15, 8000, 8000,
         1.35*f, 2.4*f, 0.75*f, 0, 3.85*f,
         2000, 1800, 1600,
-        true, true);
+        false, true);
     setFuelModelRecord(143, "SH3",
         "Moderate load, humid climate shrub (S)",
         2.4, 0.40, 8000., 8000.,
         0.45*f, 3.0*f, 0, 0, 6.2*f,
         1600, 1800, 1400,
-        true, true);
+        false, true);
     setFuelModelRecord(144, "SH4",
         "Low load, humid climate timber-shrub (S)",
         3.0, 0.30, 8000, 8000,
         0.85*f, 1.15*f, 0.2*f, 0, 2.55*f,
         2000, 1800, 1600,
-        true, true);
+        false, true);
     setFuelModelRecord(145, "SH5",
         "High load, dry climate shrub (S)",
         6.0, 0.15, 8000, 8000,
         3.6*f, 2.1*f, 0, 0, 2.9*f,
         750, 1800, 1600,
-        true, true);
+        false, true);
     setFuelModelRecord(146, "SH6",
         "Low load, humid climate shrub (S)",
         2.0, 0.30, 8000, 8000,
         2.9*f, 1.45*f, 0, 0, 1.4*f,
         750, 1800, 1600,
-        true, true);
+        false, true);
     setFuelModelRecord(147, "SH7",
         "Very high load, dry climate shrub (S)",
         6.0, 0.15, 8000, 8000,
         3.5*f, 5.3*f, 2.2*f, 0, 3.4*f,
         750, 1800, 1600,
-        true, true);
+        false, true);
     setFuelModelRecord(148, "SH8",
         "High load, humid climate shrub (S)",
         3.0, 0.40, 8000, 8000,
         2.05*f, 3.4*f, 0.85*f, 0, 4.35*f,
         750, 1800, 1600,
-        true, true);
+        false, true);
     setFuelModelRecord(149, "SH9",
         "Very high load, humid climate shrub (D)",
         4.4, 0.40, 8000, 8000,
         4.5*f, 2.45*f, 0, 1.55*f, 7.0*f,
         750, 1800, 1500,
         true, true);
-    // 150-152 reserved for future standard shrub models
-    for (int i = 150; i <= 152; i++)
-    {
-        markAsReservedModel(i);
-    }
-    // 153-159 available for custom shrub models
+
+    // Standard Shrub Models
+    setFuelModelRecord(150, "SCAL17",
+        "Chamise with Moderate Load Grass, 4 feet (Static)",
+        4, 20, 8000, 8000,
+        1.3*f, 1.0*f, 1.0*f, 2.0*f, 2.0*f,
+        640, 2200, 640,
+        false, true);
+    setFuelModelRecord(151, "SCAL15",
+        "Chamise with Low Load Grass, 3 feet (Static)",
+        3, 13, 10000, 10000,
+        2.0*f, 3.0*f, 1.0*f, 0.5*f, 2.0*f,
+        640, 2200, 640,
+        false, true);
+    setFuelModelRecord(152, "SCAL16",
+        "North Slope Ceanothus with Moderate Load Grass (Static)",
+        6, 15, 8000, 8000,
+        2.2*f, 4.8*f, 1.8*f, 3.0*f, 2.8*f,
+        500, 1500, 500,
+        false, true);
+    setFuelModelRecord(153, "SCAL14",
+        "Manzanita/Scrub Oak with Low Load Grass (Static)",
+        3, 15, 9211, 9211,
+        3.0*f, 4.5*f, 1.1*f, 1.4*f, 5.0*f,
+        350, 1500, 250,
+        false, true);
+    setFuelModelRecord(154, "SCAL18",
+        "Coastal Sage/Buckwheat Scrub with Low Load Grass (Static)",
+        3, 25, 9200, 9200,
+        5.5*f, 0.8*f, 0.1*f, 0.75*f, 2.5*f,
+        640, 1500, 640,
+        false, true);
+
+    setFuelModelRecord(155, "V-MH",
+        "Short Green Shrub < 1 m With Grass, Discontinuous (< 1 m) often discontinuous and with grass (Dynamic)",
+        0.55*mToFt, 25, 19500*kjPerKgToBtuPerLb, 19500*kjPerKgToBtuPerLb,
+        1.0*tphToLbsPerSqFt, 1.0*tphToLbsPerSqFt, 0, 1.5*tphToLbsPerSqFt, 5.5*tphToLbsPerSqFt,
+        4500*mSavToFtSav, 8500*mSavToFtSav, 4000*mSavToFtSav,
+        true, true);
+    setFuelModelRecord(156, "V-MMb",
+        "Short Shrub < 1 m, Low Dead Fraction and/or Thick Foliage (Static)",
+        0.9*mToFt, 20, 20500*kjPerKgToBtuPerLb, 20500*kjPerKgToBtuPerLb,
+        4.0*tphToLbsPerSqFt, 0.5*tphToLbsPerSqFt, 0, 0, 7.0*tphToLbsPerSqFt,
+        3000*mSavToFtSav, 3000*mSavToFtSav, 3000*mSavToFtSav,
+        false, true);
+    setFuelModelRecord(157, "V-MAb",
+        "Short Shrub < 1 m, High Dead Fraction and/or Thin Fuel (Static)",
+        0.5*mToFt, 35, 21000*kjPerKgToBtuPerLb, 21000*kjPerKgToBtuPerLb,
+        6.0*tphToLbsPerSqFt, 0.5*tphToLbsPerSqFt, 0, 0, 7.5*tphToLbsPerSqFt,
+        4500*mSavToFtSav, 4500*mSavToFtSav, 4500*mSavToFtSav,
+        false, true);
+    setFuelModelRecord(158, "V-MMa",
+        "Tall Shrub > 1 m, Low Dead Fraction and/or Thick Foliage (Static)",
+        1.7*mToFt, 24, 20500*kjPerKgToBtuPerLb, 20500*kjPerKgToBtuPerLb,
+        6.0*tphToLbsPerSqFt, 4.0*tphToLbsPerSqFt, 0, 0, 13.0*tphToLbsPerSqFt,
+        2500*mSavToFtSav, 3000*mSavToFtSav, 3000*mSavToFtSav,
+        false, true);
+    setFuelModelRecord(159, "V-MAa",
+        "Tall Shrub > 1 m, High Dead Fraction and/or Thin Fuel (Static)",
+        1.05*mToFt, 35, 21000*kjPerKgToBtuPerLb, 21000*kjPerKgToBtuPerLb,
+        9.5*tphToLbsPerSqFt, 2.5*tphToLbsPerSqFt, 0, 0, 14.5*tphToLbsPerSqFt,
+        3500*mSavToFtSav, 4000*mSavToFtSav, 4000*mSavToFtSav,
+        false, true);
 
     // Timber and understory
     // 160 available for custom timber and understory model
@@ -446,7 +521,7 @@ void FuelModels::populateFuelModels()
         1.0, 0.30, 8000, 8000,
         0.95*f, 1.8*f, 1.25*f, 0, 0.2*f,
         2000, 1800, 1600,
-        true, true);
+        false, true);
     setFuelModelRecord(163, "TU3",
         "Moderate load, humid climate timber-grass-shrub (D)",
         1.3, 0.30, 8000, 8000,
@@ -458,19 +533,57 @@ void FuelModels::populateFuelModels()
         0.5, 0.12, 8000, 8000,
         4.5*f, 0, 0, 0, 2.0*f,
         2300, 1800, 2000,
-        true, true);
+        false, true);
     setFuelModelRecord(165, "TU5",
         "Very high load, dry climate timber-shrub (S)",
         1.0, 0.25, 8000, 8000,
         4.0*f, 4.0*f, 3.0*f, 0, 3.0*f,
         1500, 1800, 750,
+        false, true);
+    setFuelModelRecord(166, "M-EUCd",
+        "Discontinuous Litter Eucalyptus Plantation, With or Without Shrub Understory (Static)",
+        0.4*mToFt, 26, 21000*kjPerKgToBtuPerLb, 20500*kjPerKgToBtuPerLb,
+        1.37*tphToLbsPerSqFt, 2.89*tphToLbsPerSqFt, 1.59*tphToLbsPerSqFt, 0, 1.84*tphToLbsPerSqFt,
+        4500*mSavToFtSav, 4200*mSavToFtSav, 5000*mSavToFtSav,
+        false, true);
+    setFuelModelRecord(167, "M-H",
+        "Deciduous or Conifer Litter, Shrub and Herb Understory",
+        0.1*mToFt, 30, 20500*kjPerKgToBtuPerLb, 20500*kjPerKgToBtuPerLb,
+        2.71*tphToLbsPerSqFt, 1.0*tphToLbsPerSqFt, 0, 0.66*tphToLbsPerSqFt, 0.1*tphToLbsPerSqFt,
+        5500*mSavToFtSav, 8000*mSavToFtSav, 4500*mSavToFtSav,
         true, true);
-    // 166-170 reserved for future standard timber and understory models
-    for (int i = 166; i <= 170; i++)
-    {
-        markAsReservedModel(i);
-    }
-    // 171-179 available for custom timber and understory models
+    setFuelModelRecord(168, "M-F",
+        "Deciduous or Conifer Litter, Shrub and Fern Understory (Dynamic)",
+        0.3*mToFt, 35, 19500*kjPerKgToBtuPerLb, 19500*kjPerKgToBtuPerLb,
+        4.5*tphToLbsPerSqFt, 1.5*tphToLbsPerSqFt, 0.5*tphToLbsPerSqFt, 2.35*tphToLbsPerSqFt, 0.48*tphToLbsPerSqFt,
+        6000*mSavToFtSav, 8000*mSavToFtSav, 4500*mSavToFtSav,
+        true, true);
+    setFuelModelRecord(169, "M-CAD",
+        "Deciduous Litter, Shrub Understory (Static)",
+        0.63*mToFt, 30, 20000*kjPerKgToBtuPerLb, 20000*kjPerKgToBtuPerLb,
+        4.54*tphToLbsPerSqFt, 1.87*tphToLbsPerSqFt, 0.61*tphToLbsPerSqFt, 0, 9.08*tphToLbsPerSqFt,
+        6000*mSavToFtSav, 4921*mSavToFtSav, 5000*mSavToFtSav,
+        false, true);
+    setFuelModelRecord(170, "M-ESC",
+        "Sclerophyll Broadleaf Litter, Shrub Understory (Static)",
+        0.5*mToFt, 27, 20500*kjPerKgToBtuPerLb, 20500*kjPerKgToBtuPerLb,
+        5.65*tphToLbsPerSqFt, 1.5*tphToLbsPerSqFt, 0.48*tphToLbsPerSqFt, 0, 7.89*tphToLbsPerSqFt,
+        5000*mSavToFtSav, 4921*mSavToFtSav, 5500*mSavToFtSav,
+        false, true);
+    setFuelModelRecord(171, "M-PIN",
+        "Medium-Long Needle Pine Litter, Shrub Understory (Static)",
+        0.5*mToFt, 40, 20500*kjPerKgToBtuPerLb, 21500*kjPerKgToBtuPerLb,
+        7.21*tphToLbsPerSqFt, 3.0*tphToLbsPerSqFt, 0, 0, 6.89*tphToLbsPerSqFt,
+        5500*mSavToFtSav, 5500*mSavToFtSav, 6000*mSavToFtSav,
+        false, true);
+    setFuelModelRecord(172, "M-EUC",
+        "Eucalyptus Litter, Shrub Understory (Static)",
+        0.64*mToFt, 32, 21000*kjPerKgToBtuPerLb, 21000*kjPerKgToBtuPerLb,
+        8.37*tphToLbsPerSqFt, 3.81*tphToLbsPerSqFt, 0, 0, 4.51*tphToLbsPerSqFt,
+        4700*mSavToFtSav, 4200*mSavToFtSav, 5000*mSavToFtSav,
+        false, true);
+
+    // 173-179 available for custom timber and understory models
 
     // Timber and litter
     // 180 available for custom timber and litter models
@@ -479,62 +592,81 @@ void FuelModels::populateFuelModels()
         0.2, 0.30, 8000, 8000,
         1.0*f, 2.2*f, 3.6*f, 0, 0,
         2000, 1800, 1600,
-        true, true);
+        false, true);
     setFuelModelRecord(182, "TL2",
         "Low load broadleaf litter (S)",
         0.2, 0.25, 8000, 8000,
         1.4*f, 2.3*f, 2.2*f, 0, 0,
         2000, 1800, 1600,
-        true, true);
+        false, true);
     setFuelModelRecord(183, "TL3",
         "Moderate load conifer litter (S)",
         0.3, 0.20, 8000, 8000,
         0.5*f, 2.2*f, 2.8*f, 0, 0,
         2000, 1800, 1600,
-        true, true);
+        false, true);
     setFuelModelRecord(184, "TL4",
         "Small downed logs (S)",
         0.4, 0.25, 8000, 8000,
         0.5*f, 1.5*f, 4.2*f, 0, 0,
         2000, 1800, 1600,
-        true, true);
+        false, true);
     setFuelModelRecord(185, "TL5",
         "High load conifer litter (S)",
         0.6, 0.25, 8000, 8000,
         1.15*f, 2.5*f, 4.4*f, 0, 0,
         2000, 1800, 160,
-        true, true);
+        false, true);
     setFuelModelRecord(186, "TL6",
         "High load broadleaf litter (S)",
         0.3, 0.25, 8000, 8000,
         2.4*f, 1.2*f, 1.2*f, 0, 0,
         2000, 1800, 1600,
-        true, true);
+        false, true);
     setFuelModelRecord(187, "TL7",
         "Large downed logs (S)",
         0.4, 0.25, 8000, 8000,
         0.3*f, 1.4*f, 8.1*f, 0, 0,
         2000, 1800, 1600,
-        true, true);
+        false, true);
     setFuelModelRecord(188, "TL8",
         "Long-needle litter (S)",
         0.3, 0.35, 8000, 8000,
         5.8*f, 1.4*f, 1.1*f, 0, 0,
         1800, 1800, 1600,
-        true, true);
+        false, true);
     setFuelModelRecord(189, "TL9",
         "Very high load broadleaf litter (S)",
         0.6, 0.35, 8000, 8000,
         6.65*f, 3.30*f, 4.15*f, 0, 0,
         1800, 1800, 1600,
-        true, true);
-    // 190-192 reserved for future standard timber and litter models
-    for (int i = 190; i <= 192; i++)
-    {
-        markAsReservedModel(i);
-    }
+        false, true);
+    setFuelModelRecord(190, "F-RAC",
+        "Very Compact Litter, Short Needle Conifers (Static)",
+        0.05*mToFt, 28, 20500*kjPerKgToBtuPerLb, 20500*kjPerKgToBtuPerLb,
+        3.75*tphToLbsPerSqFt, 2.0*tphToLbsPerSqFt, 1.0*tphToLbsPerSqFt, 0, 1.18*tphToLbsPerSqFt,
+        6500*mSavToFtSav, 4921*mSavToFtSav, 4500*mSavToFtSav,
+        false, true);
+    setFuelModelRecord(191, "F-FOL",
+        "Compact Litter, Deciduous or Evergreen Foliage (Static)",
+        0.15*mToFt, 25, 20500*kjPerKgToBtuPerLb, 20500*kjPerKgToBtuPerLb,
+        2.67*tphToLbsPerSqFt, 1.27*tphToLbsPerSqFt, 0.69*tphToLbsPerSqFt, 0, 1.16*tphToLbsPerSqFt,
+        4500*mSavToFtSav, 5500*mSavToFtSav, 5000*mSavToFtSav,
+        false, true);
+    setFuelModelRecord(192, "F-PIN",
+        "Litter from Medium-Long Needle Pine Trees (Static)",
+        0.1*mToFt, 45, 20500*kjPerKgToBtuPerLb, 21500*kjPerKgToBtuPerLb,
+        6.5*tphToLbsPerSqFt, 1.5*tphToLbsPerSqFt, 0, 0, 0,
+        5500*mSavToFtSav, 5500*mSavToFtSav, 5500*mSavToFtSav,
+        false, true);
+    setFuelModelRecord(193, "F-EUC",
+        "Pure Eucalyptus Litter, No Understory (Static)",
+        0.32*mToFt, 26, 21000*kjPerKgToBtuPerLb, 20500*kjPerKgToBtuPerLb,
+        4.63*tphToLbsPerSqFt, 2.96*tphToLbsPerSqFt, 1.27*tphToLbsPerSqFt, 0, 1.12*tphToLbsPerSqFt,
+        4200*mSavToFtSav, 4200*mSavToFtSav, 5000*mSavToFtSav,
+        false, true);
 
-    // 193-199 available for custom timber and litter models
+    // 194-199 available for custom timber and litter models
 
     // Slash and blowdown
     // 200 available for custom slash and blowdown model
@@ -543,25 +675,25 @@ void FuelModels::populateFuelModels()
         1.0, 0.25, 8000, 8000,
         1.5*f, 3.0*f, 11.0*f, 0, 0,
         2000, 1800, 1600,
-        true, true);
+        false, true);
     setFuelModelRecord(202, "SB2",
         "Moderate load activity or low load blowdown (S)",
         1.0, 0.25, 8000, 8000,
         4.5*f, 4.25*f, 4.0*f, 0, 0,
         2000, 1800, 1600,
-        true, true);
+        false, true);
     setFuelModelRecord(203, "SB3",
         "High load activity fuel or moderate load blowdown (S)",
         1.2, 0.25, 8000, 8000,
         5.5*f, 2.75*f, 3.0*f, 0, 0,
         2000, 1800, 1600,
-        true, true);
+        false, true);
     setFuelModelRecord(204, "SB4",
         "High load blowdown (S)",
         2.7, 0.25, 8000, 8000,
         5.25*f, 3.5*f, 5.25*f, 0, 0,
         2000, 1800, 1600,
-        true, true);
+        false, true);
     // 205-210 reserved for future slash and blowdown models
     for (int i = 205; i <= 210; i++)
     {
@@ -588,6 +720,12 @@ bool FuelModels::setCustomFuelModel(int fuelModelNumber, std::string code, std::
     fuelBedDepth = LengthUnits::toBaseUnits(fuelBedDepth, lengthUnits);
 
     moistureOfExtinctionDead = FractionUnits::toBaseUnits(moistureOfExtinctionDead, moistureUnits);
+
+    if (heatOfCombustionUnits != HeatOfCombustionUnits::BtusPerPound)
+    {
+        heatOfCombustionDead = HeatOfCombustionUnits::toBaseUnits(heatOfCombustionDead, heatOfCombustionUnits);
+        heatOfCombustionLive = HeatOfCombustionUnits::toBaseUnits(heatOfCombustionLive, heatOfCombustionUnits);
+    }
 
     if (loadingUnits != LoadingUnits::PoundsPerSquareFoot)
     {

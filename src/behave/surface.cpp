@@ -3,7 +3,7 @@
 * Project:  CodeBlocks
 * Purpose:  Class for handling surface fire behavior based on the Facade OOP
 *           Design Pattern and using the Rothermel spread model
-* Author:   William Chatham <wchatham@fs.fed.us>
+* Author:   William Chatham <wchatham@fs.fed.us>, old email
 * Credits:  Some of the code in this file is, in part or in whole, from
 *           BehavePlus5 source originally authored by Collin D. Bevins and is
 *           used with or without modification.
@@ -387,6 +387,18 @@ double Surface::getRelativePackingRatio() const {
 
 double Surface::getPackingRatio() const {
   return surfaceFire_.getPackingRatio();
+}
+
+double Surface::getTotalLiveFuelLoad(LoadingUnits::LoadingUnitsEnum loadingUnits) const {
+    return surfaceFire_.getTotalLiveFuelLoad(loadingUnits);
+}
+
+double Surface::getTotalDeadFuelLoad(LoadingUnits::LoadingUnitsEnum loadingUnits) const {
+    return surfaceFire_.getTotalDeadFuelLoad(loadingUnits);
+}
+
+double Surface::getTotalDeadHerbaceousFuelLoad(LoadingUnits::LoadingUnitsEnum loadingUnits) const {
+    return surfaceFire_.getTotalDeadHerbaceousFuelLoad(loadingUnits);
 }
 
 void Surface::setCanopyCover(double canopyCover, FractionUnits::FractionUnitsEnum canopyUnits)

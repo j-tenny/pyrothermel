@@ -33,6 +33,7 @@
 #define SPOT_H
 
 #include "spotInputs.h"
+#include "CrownFirebrandProcessor.h"
 
 class Spot
 {
@@ -48,6 +49,7 @@ public:
     void calculateSpottingDistanceFromBurningPile();
     void calculateSpottingDistanceFromSurfaceFire();
     void calculateSpottingDistanceFromTorchingTrees();
+    void calculateSpottingDistanceFromActiveCrown();
 
   // Spot Inputs Setters
     void setBurningPileFlameHeight(double buringPileflameHeight, LengthUnits::LengthUnitsEnum flameHeightUnits);
@@ -55,6 +57,8 @@ public:
     void setDownwindCoverHeight(double downwindCoverHeight, LengthUnits::LengthUnitsEnum coverHeightUnits);
     void setDownwindCanopyMode(SpotDownWindCanopyMode::SpotDownWindCanopyModeEnum downwindCanopyMode);
     void setFlameLength(double flameLength, LengthUnits::LengthUnitsEnum flameLengthUnits);
+    void setActiveCrownFlameLength(double activeCrownFlameLength, LengthUnits::LengthUnitsEnum flameLengthUnits);
+    void setFirelineIntensity(double firelineIntensity, FirelineIntensityUnits::FirelineIntensityUnitsEnum firelineIntensityUnits);
     void setLocation(SpotFireLocation::SpotFireLocationEnum location);
     void setRidgeToValleyDistance(double ridgeToValleyDistance, LengthUnits::LengthUnitsEnum ridgeToValleyDistanceUnits);
     void setRidgeToValleyElevation(double ridgeToValleyElevation, LengthUnits::LengthUnitsEnum elevationUnits);
@@ -77,6 +81,10 @@ public:
       double downwindCoverHeight, LengthUnits::LengthUnitsEnum coverHeightUnits, SpotDownWindCanopyMode::SpotDownWindCanopyModeEnum downwindCanopyMode,
       int torchingTrees, double DBH, LengthUnits::LengthUnitsEnum DBHUnits, double treeHeight, LengthUnits::LengthUnitsEnum  treeHeightUnits,
       SpotTreeSpecies::SpotTreeSpeciesEnum treeSpecies, double windSpeedAtTwentyFeet, SpeedUnits::SpeedUnitsEnum windSpeedUnits);
+  void updateSpotInputsForActiveCrownFire(SpotFireLocation::SpotFireLocationEnum location, double ridgeToValleyDistance,
+      LengthUnits::LengthUnitsEnum ridgeToValleyDistanceUnits, double ridgeToValleyElevation, LengthUnits::LengthUnitsEnum elevationUnits,
+      double treeHeight, LengthUnits::LengthUnitsEnum treeHeightUnits, SpotDownWindCanopyMode::SpotDownWindCanopyModeEnum downwindCanopyMode, 
+      double windSpeedAtTwentyFeet, SpeedUnits::SpeedUnitsEnum windSpeedUnits, double activeCrownFlameLength, LengthUnits::LengthUnitsEnum flameLengthUnits);
 
   // Spot Inputs Getters
     double getBurningPileFlameHeight(LengthUnits::LengthUnitsEnum flameHeightUnits) const;
@@ -84,6 +92,8 @@ public:
     double getDownwindCoverHeight(LengthUnits::LengthUnitsEnum coverHeightUnits) const;
     SpotDownWindCanopyMode::SpotDownWindCanopyModeEnum getDownwindCanopyMode() const;
     double getSurfaceFlameLength(LengthUnits::LengthUnitsEnum surfaceFlameLengthUnits) const;
+    double getActiveCrownFlameLength(LengthUnits::LengthUnitsEnum flameLengthUnits) const;
+    double getCrownFirelineIntensity(FirelineIntensityUnits::FirelineIntensityUnitsEnum firelineIntensityUnits) const;
     SpotFireLocation::SpotFireLocationEnum getLocation() const;
     double getRidgeToValleyDistance(LengthUnits::LengthUnitsEnum ridgeToValleyDistanceUnits) const;
     double getRidgeToValleyElevation(LengthUnits::LengthUnitsEnum elevationUnits) const;
@@ -109,10 +119,13 @@ public:
     double getMaxMountainousTerrainSpottingDistanceFromSurfaceFire(LengthUnits::LengthUnitsEnum spottingDistanceUnits) const;
     double getMaxMountainousTerrainSpottingDistanceFromTorchingTrees(LengthUnits::LengthUnitsEnum spottingDistanceUnits) const;
 
+    double getMaxMountainousTerrainSpottingDistanceFromActiveCrown(LengthUnits::LengthUnitsEnum spottingDistanceUnits) const;
+
 protected:
     void memberwiseCopyAssignment(const Spot& rhs);
     double calculateSpotCriticalCoverHeight(double firebrandHeight, double coverHeight);
-    double calculateDownwindCanopyCoverHeight() const;
+    double calculateDownwindCanopyCoverHeight(LengthUnits::LengthUnitsEnum coverHeightUnits) const;
+    double calculateTreeHeight(LengthUnits::LengthUnitsEnum coverHeightUnits) const;
     double spotDistanceFlatTerrain(double firebrandHeight, double coverHeight, double windSpeedAtTwentyFeet);
     double spotDistanceMountainTerrain(double flatDistance, SpotFireLocation::SpotFireLocationEnum location,
     double ridgeToValleyDistance, double ridgeToValleyElevation);
@@ -137,9 +150,12 @@ protected:
     double flatDistanceFromBurningPile_;        // Maximum spotting distance over flat terrain for burning pile(mi).
     double flatDistanceFromSurfaceFire_;        // Maximum spotting distance over flat terrain for surface fire(mi).
     double flatDistanceFromTorchingTrees_;      // Maximum spotting distance over flat terrain for torching trees(mi).
+    double flatDistanceFromActiveCrown_;      // Maximum spotting distance over flat terrain for torching trees(mi).
+
     double mountainDistanceFromBurningPile_;    // Maximum spotting distance over mountain terrain for burning pile(mi).
     double mountainDistanceFromSurfaceFire_;    // Maximum spotting distance over mountain terrain surface fire(mi).
     double mountainDistanceFromTorchingTrees_;  // Maximum spotting distance over mountain terrain torching trees(mi).
+    double mountainDistanceFromActiveCrown_;    // Maximum spotting distance over mountain terrain active crown(mi).
 };
 
 #endif // SPOT_H

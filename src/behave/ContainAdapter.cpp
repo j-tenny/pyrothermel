@@ -182,9 +182,11 @@ void ContainAdapter::doContainRun()
         containSim.run();
 
         // Store Values from ContainSim For Access in SIGContainAdapter
-        m_size       = containSim.firePoints();
-        m_x          = containSim.firePerimeterX();
-        m_y          = containSim.firePerimeterY();
+        m_size   = containSim.firePoints();
+        m_xData  = std::vector<double>(containSim.firePerimeterX(), containSim.firePerimeterX() + m_size);
+        m_yData  = std::vector<double>(containSim.firePerimeterY(), containSim.firePerimeterY() + m_size);
+        m_x      = m_xData.data();
+        m_y      = m_yData.data();
         m_reportHead = containSim.fireHeadAtReport();
         m_reportBack = containSim.fireBackAtReport();
         m_attackHead = containSim.fireHeadAtAttack();
@@ -199,6 +201,7 @@ void ContainAdapter::doContainRun()
         finalTime_ = TimeUnits::toBaseUnits(containSim.finalFireTime(), TimeUnits::Minutes);
         containmentStatus_ = convertSemStatusToAdapterStatus(containSim.status());
         containmentStatus_ = static_cast<ContainStatus::ContainStatusEnum>(containSim.status());
+        finalProductionRate_ = finalFireLineLength_ / finalTime_;
 
         // Calculate effective windspeed needed for Size module
         // Find the effective windspeed
@@ -299,4 +302,8 @@ ContainAdapterEnums::ContainStatus::ContainStatusEnum ContainAdapter::convertSem
 Sem::ContainFlank ContainAdapter::converAdapterFlankToSemFlank(ContainAdapterEnums::ContainFlank::ContainFlankEnum flank)
 {
     return (Sem::ContainFlank)flank;
+}
+
+double ContainAdapter::getFinalProductionRate(SpeedUnits::SpeedUnitsEnum productionRateUnits) const {
+    return SpeedUnits::fromBaseUnits(finalProductionRate_, productionRateUnits);
 }

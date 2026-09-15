@@ -91,10 +91,7 @@ public:
     double getSurfaceFireSpreadDistance(LengthUnits::LengthUnitsEnum lengthUnits, double elapsedTime, TimeUnits::TimeUnitsEnum timeUnits) const;
     double getCrownFirelineIntensity(FirelineIntensityUnits::FirelineIntensityUnitsEnum firelineIntensityUnits) const;
     double getCrownFlameLength(LengthUnits::LengthUnitsEnum flameLengthUnits) const;
-    double getTransitionRatio() const;
-    double getActiveRatio() const;
     FireType::FireTypeEnum getFireType() const;
-    std::string getFireTypeStr() const;
 
     double getFinalSpreadRate(SpeedUnits::SpeedUnitsEnum spreadRateUnits) const;
     double getFinalHeatPerUnitArea(HeatPerUnitAreaUnits::HeatPerUnitAreaUnitsEnum heatPerUnitAreaUnits) const;

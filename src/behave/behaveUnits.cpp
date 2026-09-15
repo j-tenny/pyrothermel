@@ -30,6 +30,7 @@
 
 double LengthUnits::toBaseUnits(double value, LengthUnits::LengthUnitsEnum units)
 {
+    if (value == 0.0) return 0.0;
     // Length to base units constants
     const double INCHES_TO_FEET = 0.08333333333333;
     const double METERS_TO_FEET = 3.2808398950131;
@@ -91,6 +92,7 @@ double LengthUnits::toBaseUnits(double value, LengthUnits::LengthUnitsEnum units
 
 double LengthUnits::fromBaseUnits(double value, LengthUnits::LengthUnitsEnum units)
 {
+    if (value == 0.0) return 0.0;
     // Length from base units constants
     const double FEET_TO_INCHES = 12;
     const double FEET_TO_CENTIMETERS = 30.480;
@@ -146,6 +148,7 @@ double LengthUnits::fromBaseUnits(double value, LengthUnits::LengthUnitsEnum uni
 
 double SpeedUnits::toBaseUnits(double value, SpeedUnits::SpeedUnitsEnum units)
 {
+    if (value == 0.0) return 0.0;
     // Velocity to base units constants
     const double METERS_PER_SECOND_TO_FEET_PER_MINUTE = 196.8503937;
     const double METERS_PER_MINUTE_TO_FEET_PER_MINUTE = 3.28084;
@@ -153,6 +156,7 @@ double SpeedUnits::toBaseUnits(double value, SpeedUnits::SpeedUnitsEnum units)
     const double CHAINS_PER_HOUR_TO_FEET_PER_MINUTE = 1.1;
     const double MILES_PER_HOUR_TO_FEET_PER_MINUTE = 88;
     const double KILOMETERS_PER_HOUR_TO_FEET_PER_MINUTE = 54.680665;
+    const double FURLONGS_PER_FORTNIGHT_TO_FEET_PER_MINUTE = 660.0 / 20160.0;
 
     switch (units)
     {
@@ -191,6 +195,11 @@ double SpeedUnits::toBaseUnits(double value, SpeedUnits::SpeedUnitsEnum units)
             value *= KILOMETERS_PER_HOUR_TO_FEET_PER_MINUTE;
             break;
         }
+        case FurlongsPerFortnight:
+        {
+            value *= FURLONGS_PER_FORTNIGHT_TO_FEET_PER_MINUTE;
+            break;
+        }
         default:
         {
             ; // TODO: Handle error
@@ -201,6 +210,7 @@ double SpeedUnits::toBaseUnits(double value, SpeedUnits::SpeedUnitsEnum units)
 
 double SpeedUnits::fromBaseUnits(double value, SpeedUnits::SpeedUnitsEnum units)
 {
+    if (value == 0.0) return 0.0;
     // Velocity from base units constants
     const double FEET_PER_MINUTE_TO_METERS_PER_SECOND = 0.00508;
     const double FEET_PER_MINUTE_TO_METERS_PER_MINUTE = 0.3048;
@@ -208,6 +218,7 @@ double SpeedUnits::fromBaseUnits(double value, SpeedUnits::SpeedUnitsEnum units)
     const double FEET_PER_MINUTE_TO_CHAINS_PER_HOUR = 10.0 / 11.0;
     const double FEET_PER_MINUTE_TO_MILES_PER_HOUR = 0.01136363636;
     const double FEET_PER_MINUTE_TO_KILOMETERS_PER_HOUR = 0.018288;
+    const double FEET_PER_MINUTE_TO_FURLONGS_PER_FORTNIGHT = 20160.0 / 660.0;
 
     switch (units)
     {
@@ -246,6 +257,11 @@ double SpeedUnits::fromBaseUnits(double value, SpeedUnits::SpeedUnitsEnum units)
             value *= FEET_PER_MINUTE_TO_KILOMETERS_PER_HOUR;
             break;
         }
+        case FurlongsPerFortnight:
+        {
+            value *= FEET_PER_MINUTE_TO_FURLONGS_PER_FORTNIGHT;
+            break;
+        }
         default:
         {
             ; // TODO: Handle error
@@ -256,6 +272,7 @@ double SpeedUnits::fromBaseUnits(double value, SpeedUnits::SpeedUnitsEnum units)
 
 double FractionUnits::toBaseUnits(double value, FractionUnitsEnum units)
 {
+    if (value == 0.0) return 0.0;
     if (units == Percent)
     {
         value /= 100.0;
@@ -265,6 +282,7 @@ double FractionUnits::toBaseUnits(double value, FractionUnitsEnum units)
 
 double FractionUnits::fromBaseUnits(double value, FractionUnitsEnum units)
 {
+    if (value == 0.0) return 0.0;
     if (units == Percent)
     {
         value *= 100.0;
@@ -274,6 +292,7 @@ double FractionUnits::fromBaseUnits(double value, FractionUnitsEnum units)
 
 double SlopeUnits::toBaseUnits(double value, SlopeUnitsEnum units)
 {
+    if (value == 0.0) return 0.0;
     static const double PI = 3.141592653589793238463;
 
     if (units == Percent)
@@ -285,6 +304,7 @@ double SlopeUnits::toBaseUnits(double value, SlopeUnitsEnum units)
 
 double SlopeUnits::fromBaseUnits(double value, SlopeUnitsEnum units)
 {
+    if (value == 0.0) return 0.0;
     static const double PI = 3.141592653589793238463;
 
     if (units == Percent)
@@ -296,6 +316,7 @@ double SlopeUnits::fromBaseUnits(double value, SlopeUnitsEnum units)
 
 double DensityUnits::toBaseUnits(double value, DensityUnitsEnum units)
 {
+    if (value == 0.0) return 0.0;
     // Denisty to base units constants
     //static const double KG_PER_CUBIC_METER_TO_LBS_PER_CUBIC_FOOT = 0.06242796051;
     static const double KG_PER_CUBIC_METER_TO_LBS_PER_CUBIC_FOOT = 0.06242781786;
@@ -309,6 +330,7 @@ double DensityUnits::toBaseUnits(double value, DensityUnitsEnum units)
 
 double DensityUnits::fromBaseUnits(double value, DensityUnitsEnum units)
 {
+    if (value == 0.0) return 0.0;
     // Denisty from base units constants
     //static const double LBS_PER_CUBIC_FOOT_TO_KG_PER_CUBIC_METER = 16.018463390932;
     static const double LBS_PER_CUBIC_FOOT_TO_KG_PER_CUBIC_METER = 16.0185;
@@ -322,6 +344,7 @@ double DensityUnits::fromBaseUnits(double value, DensityUnitsEnum units)
 
 double LoadingUnits::toBaseUnits(double value, LoadingUnitsEnum units)
 {
+    if (value == 0.0) return 0.0;
     // Velocity to base units constants
     const double KILOGRAMS_PER_SQUARE_METER_TO_POUNDS_PER_SQUARE_FOOT = 0.2048161436225217;
     const double TONS_PER_ACRE_TO_POUNDS_PER_SQUARE_FOOT = 0.045913682277318638;
@@ -359,6 +382,7 @@ double LoadingUnits::toBaseUnits(double value, LoadingUnitsEnum units)
 
 double LoadingUnits::fromBaseUnits(double value, LoadingUnitsEnum units)
 {
+    if (value == 0.0) return 0.0;
     // Velocity to base units constants
     const double POUNDS_PER_SQUARE_FOOT_TO_KILOGRAMS_PER_SQUARE_METER = 4.88242763638305;
     const double POUNDS_PER_SQUARE_FOOT_TO_TONS_PER_ACRE = 21.78;
@@ -395,69 +419,7 @@ double LoadingUnits::fromBaseUnits(double value, LoadingUnitsEnum units)
 }
 
 double PressureUnits::toBaseUnits(double value, PressureUnitsEnum units) {
-  // Pressure to base units constants
-  const double HECTOPASCAL_TO_PASCAL     = 1e2;
-  const double KILOPASCAL_TO_PASCAL      = 1e3;
-  const double MEGAPASCAL_TO_PASCAL      = 1e6;
-  const double GIGAPASCAL_TO_PASCAL      = 1e9;
-  const double BAR_TO_PASCAL             = 1e5;
-  const double ATMOSPHERE_TO_PASCAL      = 101325;
-  const double TECH_ATMOSPHERE_TO_PASCAL = 98066.5;
-  const double POUNDS_PER_SQUARE_INCH    = 6894.757;
-
-  switch (units)
-  {
-      case Pascal:
-      {
-          // Already in base, nothing to do
-          break;
-      }
-      case HectoPascal:
-      {
-          value /= HECTOPASCAL_TO_PASCAL;
-          break;
-      }
-      case KiloPascal:
-      {
-          value /= KILOPASCAL_TO_PASCAL;
-          break;
-      }
-      case MegaPascal:
-      {
-          value /= MEGAPASCAL_TO_PASCAL;
-          break;
-      }
-      case GigaPascal:
-      {
-          value /= GIGAPASCAL_TO_PASCAL;
-          break;
-      }
-      case Bar:
-      {
-          value /= BAR_TO_PASCAL;
-          break;
-      }
-      case Atmosphere:
-      {
-          value /= ATMOSPHERE_TO_PASCAL;
-          break;
-      }
-      case TechnicalAtmosphere:
-      {
-          value /= TECH_ATMOSPHERE_TO_PASCAL;
-          break;
-      }
-      case PoundPerSquareInch:
-      {
-          value /= POUNDS_PER_SQUARE_INCH;
-          break;
-      }
-  }
-
-  return value;
-}
-
-double PressureUnits::fromBaseUnits(double value, PressureUnitsEnum units) {
+  if (value == 0.0) return 0.0;
   // Pressure to base units constants
   const double HECTOPASCAL_TO_PASCAL     = 1e2;
   const double KILOPASCAL_TO_PASCAL      = 1e3;
@@ -510,8 +472,72 @@ double PressureUnits::fromBaseUnits(double value, PressureUnitsEnum units) {
           value *= TECH_ATMOSPHERE_TO_PASCAL;
           break;
       }
-      case PoundPerSquareInch: {
+      case PoundPerSquareInch:
+      {
           value *= POUNDS_PER_SQUARE_INCH;
+          break;
+      }
+  }
+
+  return value;
+}
+
+double PressureUnits::fromBaseUnits(double value, PressureUnitsEnum units) {
+  if (value == 0.0) return 0.0;
+  // Pressure to base units constants
+  const double HECTOPASCAL_TO_PASCAL     = 1e2;
+  const double KILOPASCAL_TO_PASCAL      = 1e3;
+  const double MEGAPASCAL_TO_PASCAL      = 1e6;
+  const double GIGAPASCAL_TO_PASCAL      = 1e9;
+  const double BAR_TO_PASCAL             = 1e5;
+  const double ATMOSPHERE_TO_PASCAL      = 101325;
+  const double TECH_ATMOSPHERE_TO_PASCAL = 98066.5;
+  const double POUNDS_PER_SQUARE_INCH    = 6894.757;
+
+  switch (units)
+  {
+      case Pascal:
+      {
+          // Already in base, nothing to do
+          break;
+      }
+      case HectoPascal:
+      {
+          value /= HECTOPASCAL_TO_PASCAL;
+          break;
+      }
+      case KiloPascal:
+      {
+          value /= KILOPASCAL_TO_PASCAL;
+          break;
+      }
+      case MegaPascal:
+      {
+          value /= MEGAPASCAL_TO_PASCAL;
+          break;
+      }
+      case GigaPascal:
+      {
+          value /= GIGAPASCAL_TO_PASCAL;
+          break;
+      }
+      case Bar:
+      {
+          value /= BAR_TO_PASCAL;
+          break;
+      }
+      case Atmosphere:
+      {
+          value /= ATMOSPHERE_TO_PASCAL;
+          break;
+      }
+      case TechnicalAtmosphere:
+      {
+          value /= TECH_ATMOSPHERE_TO_PASCAL;
+          break;
+      }
+      case PoundPerSquareInch: {
+          value /= POUNDS_PER_SQUARE_INCH;
           break;
       }
   }
@@ -521,10 +547,11 @@ double PressureUnits::fromBaseUnits(double value, PressureUnitsEnum units) {
 
 double SurfaceAreaToVolumeUnits::toBaseUnits(double value, SurfaceAreaToVolumeUnitsEnum units)
 {
-    const double SQUARE_METERS_OVER_CUBIC_METERS_TO_SQUARE_FEET_OVER_CUBIC_FEET = 3.280839895013123;
+    if (value == 0.0) return 0.0;
+    const double SQUARE_METERS_OVER_CUBIC_METERS_TO_SQUARE_FEET_OVER_CUBIC_FEET = 0.3048;
 
-    const double SQUARE_INCHES_OVER_CUBIC_INCHES_TO_SQUARE_FEET_OVER_CUBIC_FEET = 0.083333333333333;
-    const double SQUARE_CENTIMETERS_OVER_CUBIC_CENTIMERS_TO_SQUARE_FEET_OVER_CUBIC_FEET = 0.03280839895013123;
+    const double SQUARE_INCHES_OVER_CUBIC_INCHES_TO_SQUARE_FEET_OVER_CUBIC_FEET = 12;
+    const double SQUARE_CENTIMETERS_OVER_CUBIC_CENTIMERS_TO_SQUARE_FEET_OVER_CUBIC_FEET = 30.48;
 
     switch (units)
     {
@@ -558,9 +585,10 @@ double SurfaceAreaToVolumeUnits::toBaseUnits(double value, SurfaceAreaToVolumeUn
 
 double SurfaceAreaToVolumeUnits::fromBaseUnits(double value, SurfaceAreaToVolumeUnitsEnum units)
 {
-    const double SQUARE_FEET_OVER_CUBIC_FEET_TO_SQUARE_METERS_OVER_CUBIC_METERS = 0.3048;
-    const double SQUARE_FEET_OVER_CUBIC_FEET_TO_SQUARE_INCHES_OVER_CUBIC_INCHES = 12;
-    const double SQUARE_FEET_OVER_CUBIC_FEET_TO_SQUARE_CENTIMETERS_OVER_CUBIC_CENTIMERS = 30.48;
+    if (value == 0.0) return 0.0;
+    const double SQUARE_FEET_OVER_CUBIC_FEET_TO_SQUARE_METERS_OVER_CUBIC_METERS = 3.280839895013123;
+    const double SQUARE_FEET_OVER_CUBIC_FEET_TO_SQUARE_INCHES_OVER_CUBIC_INCHES = 0.083333333333333;
+    const double SQUARE_FEET_OVER_CUBIC_FEET_TO_SQUARE_CENTIMETERS_OVER_CUBIC_CENTIMERS = 0.03280839895013123;
 
     switch (units)
     {
@@ -648,6 +676,7 @@ double TemperatureUnits::fromBaseUnits(double value, TemperatureUnitsEnum units)
 
 double TimeUnits::toBaseUnits(double value, TimeUnitsEnum units)
 {
+    if (value == 0.0) return 0.0;
     switch (units)
     {
         case Minutes:
@@ -685,6 +714,7 @@ double TimeUnits::toBaseUnits(double value, TimeUnitsEnum units)
 
 double TimeUnits::fromBaseUnits(double value, TimeUnitsEnum units)
 {
+    if (value == 0.0) return 0.0;
     switch (units)
     {
         case Minutes:
@@ -722,6 +752,7 @@ double TimeUnits::fromBaseUnits(double value, TimeUnitsEnum units)
 
 double AreaUnits::toBaseUnits(double value, AreaUnitsEnum units)
 {
+    if (value == 0.0) return 0.0;
     const double ACRES_TO_SQUARE_FEET = 43560.002160576107;
     const double HECTARES_TO_SQUARE_FEET = 107639.10416709723;
     const double SQUARE_METERS_TO_SQUARE_FEET = 10.76391041671;
@@ -771,6 +802,7 @@ double AreaUnits::toBaseUnits(double value, AreaUnitsEnum units)
 
 double AreaUnits::fromBaseUnits(double value, AreaUnitsEnum units)
 {
+    if (value == 0.0) return 0.0;
     const double SQUARE_FEET_TO_ACRES = 2.295684e-05;
     const double SQUARE_FEET_TO_HECTARES = 0.0000092903036;
     const double SQUARE_FEET_TO_SQUARE_KILOMETERS = 9.290304e-08;
@@ -820,6 +852,7 @@ double AreaUnits::fromBaseUnits(double value, AreaUnitsEnum units)
 
 double BasalAreaUnits::toBaseUnits(double value, BasalAreaUnitsEnum units)
 {
+    if (value == 0.0) return 0.0;
     const double SQUARE_FEET_PER_ACRE_TO_SQUARE_METERS_PER_HECTARE = 0.229568;
 
     switch(units)
@@ -845,6 +878,7 @@ double BasalAreaUnits::toBaseUnits(double value, BasalAreaUnitsEnum units)
 
 double BasalAreaUnits::fromBaseUnits(double value, BasalAreaUnitsEnum units)
 {
+    if (value == 0.0) return 0.0;
     const double SQUARE_METERS_PER_HECTARE_TO_SQUARE_FEET_PER_ACRE = 4.356;
     switch(units)
     {
@@ -868,6 +902,7 @@ double BasalAreaUnits::fromBaseUnits(double value, BasalAreaUnitsEnum units)
 
 double HeatOfCombustionUnits::toBaseUnits(double value, HeatOfCombustionUnitsEnum units)
 {
+    if (value == 0.0) return 0.0;
     const double  KILOJOULES_PER_KILOGRAM_TO_BTUS_PER_POUND = 0.429592;
 
     switch (units)
@@ -893,6 +928,7 @@ double HeatOfCombustionUnits::toBaseUnits(double value, HeatOfCombustionUnitsEnu
 
 double HeatOfCombustionUnits::fromBaseUnits(double value, HeatOfCombustionUnitsEnum units)
 {
+    if (value == 0.0) return 0.0;
     const double BTUS_PER_POUND_TO_KILOJOULES_PER_KILOGRAM = 2.32779;
 
     switch (units)
@@ -918,6 +954,7 @@ double HeatOfCombustionUnits::fromBaseUnits(double value, HeatOfCombustionUnitsE
 
 double FirelineIntensityUnits::toBaseUnits(double value, FirelineIntensityUnitsEnum units)
 {
+    if (value == 0.0) return 0.0;
     const double BTUS_PER_FOOT_PER_MINUTE_TO_BTUS_PER_FOOT_PER_SECOND = 0.01666666666666667;
     const double KILOJOULES_PER_METER_PER_MINUTE_TO_BTUS_PER_FOOT_PER_SECOND = 0.00481120819;
     const double KILOWATTS_PER_METER_TO_BTUS_PER_FOOT_PER_SECOND = 0.2886719;
@@ -960,6 +997,7 @@ double FirelineIntensityUnits::toBaseUnits(double value, FirelineIntensityUnitsE
 
 double FirelineIntensityUnits::fromBaseUnits(double value, FirelineIntensityUnitsEnum units)
 {
+    if (value == 0.0) return 0.0;
     const double BTUS_PER_FOOT_PER_SECOND_TO_BTUS_PER_FOOT_PER_MINUTE = 60;
     const double BTUS_PER_FOOT_PER_SECOND_TO_KILOJOULES_PER_METER_PER_MINUTE = 207.848;
     const double BTUS_PER_FOOT_PER_SECOND_TO_KILOWATTS_PER_METER = 3.464140419;
@@ -1002,6 +1040,7 @@ double FirelineIntensityUnits::fromBaseUnits(double value, FirelineIntensityUnit
 
 double HeatPerUnitAreaUnits::toBaseUnits(double value, HeatPerUnitAreaUnitsEnum units)
 {
+    if (value == 0.0) return 0.0;
     const double KILOJOULES_PER_SQUARE_METER_TO_BTUS_PER_SECOND = 0.0879872;
     const double KILOWATT_SECONDS_PER_SQUARE_METER_PER_TO_BTUS_PER_SQUARE_FOOT = 0.0879872;
 
@@ -1034,6 +1073,7 @@ double HeatPerUnitAreaUnits::toBaseUnits(double value, HeatPerUnitAreaUnitsEnum 
 
 double HeatPerUnitAreaUnits::fromBaseUnits(double value, HeatPerUnitAreaUnitsEnum units)
 {
+    if (value == 0.0) return 0.0;
     const double BTUS_PER_SQUARE_FOOT_TO_KILOJOULES_PER_SQUARE_METER = 11.3653;
     const double BTUS_PER_SQUARE_FOOT_TO_KILOWATT_SECONDS_PER_SQUARE_METER = 11.3653;
 
@@ -1066,6 +1106,7 @@ double HeatPerUnitAreaUnits::fromBaseUnits(double value, HeatPerUnitAreaUnitsEnu
 
 double HeatSourceAndReactionIntensityUnits::toBaseUnits(double value, HeatSourceAndReactionIntensityUnitsEnum units)
 {
+    if (value == 0.0) return 0.0;
     const double BTUS_PER_SQUARE_FOOT_PER_SECOND_TO_BTUS_PER_SQUARE_FOOT_PER_MINUTE = 60;
     const double KILOJOULES_PER_SQUARE_METER_PER_MINUTE_TO_BTUS_PER_SQUARE_FOOT_PER_MINUTE = 0.0880549963329497;
     const double KILOWATTS_PER_SQUARE_METER_TO_BTUS_PER_SQUARE_FOOT_PER_MINUTE = 5.27921783108615;
@@ -1108,6 +1149,7 @@ double HeatSourceAndReactionIntensityUnits::toBaseUnits(double value, HeatSource
 
 double HeatSourceAndReactionIntensityUnits::fromBaseUnits(double value, HeatSourceAndReactionIntensityUnitsEnum units)
 {
+    if (value == 0.0) return 0.0;
     const double BTUS_PER_SQUARE_FOOT_PER_MINUTE_TO_BTUS_PER_SQUARE_FOOT_PER_SECOND = 0.01666666666666667;
     const double BTUS_PER_SQUARE_FOOT_PER_MINUTE_TO_KILOJOULES_PER_SQUARE_METER_PER_MINUTE = 11.356539;
     //const double BTUS_PER_SQUARE_FOOT_PER_MINUTE_TO_KILOWATTS_PER_SQUARE_METER = 0.18927565;
@@ -1151,6 +1193,7 @@ double HeatSourceAndReactionIntensityUnits::fromBaseUnits(double value, HeatSour
 
 double HeatSinkUnits::toBaseUnits(double value, HeatSinkUnitsEnum units)
 {
+    if (value == 0.0) return 0.0;
     const double KILOJOULES_PER_CUBIC_METER_TO_BTUS_PER_CUBIC_FOOT = 0.02681849745789;
     switch (units)
     {
@@ -1174,6 +1217,7 @@ double HeatSinkUnits::toBaseUnits(double value, HeatSinkUnitsEnum units)
 
 double HeatSinkUnits::fromBaseUnits(double value, HeatSinkUnitsEnum units)
 {
+    if (value == 0.0) return 0.0;
     const double BTUS_PER_CUBIC_FOOT_TO_KILOJOULES_PER_CUBIC_METER = 37.28769673134085;
     switch (units)
     {

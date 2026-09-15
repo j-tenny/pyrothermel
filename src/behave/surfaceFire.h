@@ -134,6 +134,9 @@ public:
     double getChaparralTotalFuelLoad() const;
     double getChaparralTotalLiveFuelLoad() const;
     ChaparralFuelType::ChaparralFuelTypeEnum getChaparralFuelType() const;
+    double getTotalLiveFuelLoad(LoadingUnits::LoadingUnitsEnum loadingUnits) const;
+    double getTotalDeadFuelLoad(LoadingUnits::LoadingUnitsEnum loadingUnits) const;
+    double getTotalDeadHerbaceousFuelLoad(LoadingUnits::LoadingUnitsEnum loadingUnits) const;
 
 protected:
     // Protected setters accessible to friend classes
@@ -147,6 +150,7 @@ protected:
     void setWindSpeedLimit(double windSpeedLimit);
     void setReactionIntensity(double reactionIntensity);
     void setHeatPerUnitArea(double heatPerUnitArea);
+    void setIsWindLimitEnabled(bool isWindLimitEnabled);
     void setIsWindLimitExceeded(bool isWindLimitExceeded);
     void setWindAdjustmentFactor(double windAdjustmentFactor);
     void setMidflameWindSpeed(double midflameWindSpeed);
@@ -184,6 +188,7 @@ protected:
     SurfaceFireReactionIntensity surfaceFireReactionIntensity_;
 
     // Member variables
+    bool isWindLimitEnabled_;
     bool isWindLimitExceeded_;
     double directionOfInterest_;
     double effectiveWindSpeed_;

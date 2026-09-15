@@ -132,6 +132,7 @@ struct SpeedUnits
         MetersPerHour,
         MilesPerHour,
         KilometersPerHour,
+        FurlongsPerFortnight,
     };
 
     static double toBaseUnits(double value, SpeedUnitsEnum units);
